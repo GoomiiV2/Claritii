@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Component xmlns="http://www.red5studios.com/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.red5studios.com/ ../../../../schemas/component.xsd">
+	<Info
+		title="Claritii"
+		author="Arkii"
+		description="Hides UI elements when they arn't needed"
+		url="http://www.red5studios.com/"
+		uiVersion="1000"
+	/>
+
+	<Events>
+		<Event name="ON_COMPONENT_LOAD"						bind="OnComponentLoad"/>
+		<Event name="ON_PLAYER_READY"						bind="OnPlayerReady" />
+		<Event name="MY_HUD_SHOW"							bind="OnHudShow" />
+		<Event name="ON_SIN_VIEW"							bind="OnSIN"/>
+		
+		<Event name="MY_MISSION_ACTIVITY_TRACKER_UPDATE"	bind="OnTrackerUpdateMission"/>
+		<Event name="MY_MISSION_ACTIVITY_TRACKER_DELETE"	bind="OnTrackerUpdateMissionRemove"/>
+		<Event name="MY_ACTIVITY_TRACKER_UPDATE"			bind="OnTrackerUpdate"/>
+		<Event name="MY_ACTIVITY_TRACKER_DELETE"			bind="OnTrackerRemove"/>
+		
+		<Event name="ON_WORLD_OBJECT_UPDATED"				bind="OnWorldObjectUpdate" />
+		<Event name="ON_ENTER_OUTPOST_REGION"				bind="OnEnterOutpost" />
+		
+		<Event name="ON_BATTLEFRAME_CHANGED"				bind="OnBattleframeChanged"/>
+		<Event name="ON_EXPERIENCE_CHANGED"					bind="OnExperienceChanged"/>
+		<Event name="ON_XP_BOOST_MODIFIER_CHANGED"			bind="OnXpModifierChanged"/>
+		
+		<Event name="ON_HEALTH_CHANGED"						bind="OnHealthChanged"/>
+		<Event name="ON_WEAPON_STATE_CHANGED"				bind="OnWeaponStateChnaged"/>
+		<Event name="ON_WEAPON_RELOAD"						bind="OnWeaponReload"/>
+		<Event name="ON_WEAPON_CHANGED"						bind="OnWeaponChanged"/>
+		<Event name="ON_ABILITY_SELECTED"					bind="OnAblitySelect"/>
+		<Event name="ON_ABILITY_USED"						bind="OnAblityUsed"/>
+		<Event name="ON_SUPERCHARGE_CHANGED"				bind="OnSuperChargeChanged"/>
+		<Event name="ON_ABILITIES_CHANGED"					bind="OnAlilitiesChanged"/>
+		<Event name="ON_SEAT_CHANGED"						bind="OnVehicleUpdate"/>
+		<Event name="ON_INPUT_MODE_CHANGED"					bind="OnInputModeChanged" />
+		
+		<Event name="ON_NOTIFY"								bind="OnNotify" />
+		
+		<Event name="ON_ENTER_ZONE"							bind="OnNotify" />
+	</Events>
+
+	<Frames>
+		<HUDFrame name="Main" dimensions="dock:fill;" visible="true">
+		</HUDFrame>
+		
+		<HUDFrame name="FPS_FRAME" dimensions="right:0; top:0; width:100; height:20;" visible="true">
+			<Children>
+				<StillArt id="FPS_BackPlate" dimensions="dock:fill" style="texture:colors; region:white; tint:#000000; alpha:0.25;"/>
+				<Text id="FPS_TEXT" dimensions="dock:fill;" style="halign:center; valign:center; alpha:1.0; clip:false; wrap:false"/>
+			</Children>
+		</HUDFrame>
+	</Frames>
+
+</Component>

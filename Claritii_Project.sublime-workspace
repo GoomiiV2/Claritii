@@ -1,0 +1,423 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+		{
+			"contents": "--==============================================================================================\n-- Arkii\n-- Claritii - Even has it's own song \\o/ - http://www.youtube.com/watch?v=bJbdMqspODQ\n--==============================================================================================\n\nrequire \"string\";\nrequire \"math\";\nrequire \"table\";\nrequire \"lib/lib_Debug\";\nrequire 'lib/lib_Slash';\nrequire \"lib/lib_InterfaceOptions\"\nrequire \"lib/lib_Callback2\";\nrequire \"./libs/Lokii\";\nrequire \"./libs/Uii\";\nrequire \"./libs/misc\"\nrequire \"./Fonts\"\n\n\n--=====================\n--		Constants    --\n--=====================\nlocal ADDONNAME = \"Claritii\";\nlocal FRAME = Component.GetFrame(\"Main\");\nlocal ON_LOAD_SHOW_DUR = 10;\nlocal FPS_FRAME = Component.GetFrame(\"FPS_FRAME\");\nlocal FPS_BACKPLATE = Component.GetWidget(\"FPS_BackPlate\");\nlocal FPS_TEXT = Component.GetWidget(\"FPS_TEXT\");\nlocal FPS_POLL_RATE = 0.25;\n\n--=====================\n--		Varables     --\n--=====================\nlocal ShowCallbacks = {};\n\nlocal ActivityTracker = nil;\nlocal EXPBar = nil;\nlocal Boosts = nil;\nlocal UBar = nil;\nlocal OutPost = nil;\nlocal Announcer = nil;\n\nlocal CurrentOutPost = nil;\nlocal LastPwrLvl = 0;\nlocal LastMW = 0;\nlocal LastUnderAttack = false;\n\nlocal LastHealth = 0;\nlocal LastClip = 0;\nlocal LastHKMPct = 0;\nlocal LastCalldown = 0;\n\nlocal AblityFadeCB = nil;\nlocal AblityFadeDoneCB = nil;\nlocal UBarDontFade = false;\n\nlocal actvitys = {};\n\nlocal WorldObjList = nil;\n\nlocal LastAnounceTime = 0;\nlocal AnouncerZoneCB = nil;\n\nlocal FPS_CB = nil;\nlocal FPS_Show_CB = nil;\nlocal hasCreatedMoveableFPS = false;\nlocal uiDisplayMode = false;\n\n-- The users configuration settings\nlocal conf =\n{\n	AT = \n	{\n		Enabled = true,\n		AlwaysShow = false,\n		FadeOut = 0.5,\n		FadeHold = 10,\n		ShowOnMission = true,\n		ShowOnActivity = true,\n		IsReady = false,\n		SinToggle = true,\n	},\n	\n	UBAR = \n	{\n		Enabled = true,\n		AlwaysShow = false,\n		FadeOut = 0.5,\n		FadeHold = 10,\n		ShowOnHealthPct = 0,\n		ShowOnAmmoPct = 0,\n		ShowOnHKMPct = 25,\n		ShowOnReload = true,\n		ShowOnWeaponChange = true,\n		ShowOnAblityChange = true,\n		ShowOnAblityUsed = true,\n		ShowOnCDDone = true,\n		ShowOnCDChange = true,\n		DontHideOnCD = false,\n		ShowOnInputModeChange = true,\n		IsReady = false,\n		SinToggle = true,\n	},\n	\n	EXP = \n	{\n		Enabled = true,\n		AlwaysShow = false,\n		ShowOnBfChange = true,\n		ShowOnEXPChange = true,\n		ShowOnBoostChange = true,\n		FadeOut = 0.5,\n		FadeHold = 10,\n		IsReady = false,\n		SinToggle = true,\n	},\n	\n	OS = \n	{\n		Enabled = true,\n		AlwaysShow = false,\n		FadeOut = 0.5,\n		FadeHold = 10,\n		ShowOnEnter = true,\n		ShowOnPowerLvl = true,\n		ShowUnderAttack = true,\n		ShowOnMWChangePct = 0,\n		IsReady = false,\n		SinToggle = true,\n	},\n	\n	ANC = \n	{\n		Enabled = true,\n		ZoneMinTime = 5,\n		ZoneMsgDisabled = false,\n	},\n	\n	R5Chat = \n	{\n		ShowOnLoadingScreen = true,\n	},\n	\n	FPS = \n	{\n		Enabled = false,\n		Font = \"Demi_18\",\n		FontColor = {tint=\"29FF00\", alpha=1.0, exposure=1},\n		BGColor = {tint=\"000000\", alpha=0.4, exposure=1},\n		Prefix = \"FPS: \",\n		SinToggle = false,\n		FadeOut = 0.5,\n		FadeHold = 10,\n	},\n};\n\n--=====================\n--		Events       --\n--=====================\nfunction OnComponentLoad()\n	Debug.EnableLogging(true);\n	\n	InterfaceOptions.SetCallbackFunc(UII.CheckCallbacks, ADDONNAME);\n	InterfaceOptions.NotifyOnLoaded(true);\n	UII.AddUICallback(\"__LOADED\", OnSettingsLoad);\n	InterfaceOptions.NotifyOnDisplay(true);\n	UII.AddUICallback(\"__DISPLAY\", OnUIDisplay);\n	UII.RegisterSettingsTable(conf);\n	\n	-- Lokii\n	--Lokii.ForceLocalFiles(true);\n	Lokii.SetLocalVersion(5);\n	Lokii.AddLang(\"en\", \"./lang/EN\");\n	Lokii.SetBaseLang(\"en\");\n	Lokii.LoadWebPack(\"http://arkii.eu01.aws.af.cm/FireFall/Claritii/langs\");\n	Lokii.RegisterCallback(OnLokiiWeb);\n	Lokii.SetToLocale();\n	\n	-- Hook the Ui Elements\n	ActivityTracker = HookActivityTracker();\n	EXPBar,Boosts = HookEXP();\n	UBar = HookUBar();\n	OutPost = HookOutPost();\n	Announcer = HookAnnouncer();\n	\n	PositionHookedFrames();\n	\n	FPS_CB = Callback2.CreateCycle(SetFPS, nil);\n	\n	CreateUIOptions();\nend\n\nfunction OnLokiiWeb()\n	Lokii.SetToLocale();\nend\n\nfunction OnSettingsLoad()\n	if not (conf.AT.AlwaysShow) then\n		ActivityTracker:SetParam(\"alpha\", 1);\n		Callback2.FireAndForget(function() ActivityTracker:ParamTo(\"alpha\", 0, conf.AT.FadeOut); conf.AT.IsReady = true; end, nil, ON_LOAD_SHOW_DUR);\n	end\n	\n	if not (conf.OS.AlwaysShow) then\n		OutPost:SetParam(\"alpha\", 1);\n		Callback2.FireAndForget(function() OutPost:ParamTo(\"alpha\", 0, conf.OS.FadeOut); conf.OS.IsReady = true; end, nil, ON_LOAD_SHOW_DUR);\n	end\n	\n	if not (conf.EXP.AlwaysShow) then\n		EXPBar:SetParam(\"alpha\", 1);\n		\n		-- DWMods suport, I wish I had a nicer way to do this :/\n		if (Boosts) then\n			Boosts:SetParam(\"alpha\", 1);\n		end\n		\n		Callback2.FireAndForget(function() EXPBar:ParamTo(\"alpha\", 0, conf.EXP.FadeOut); conf.EXP.IsReady = true; if (Boosts) then Boosts:ParamTo(\"alpha\", 0, conf.EXP.FadeOut); end end, nil, ON_LOAD_SHOW_DUR);\n	end\n	\n	if not (conf.UBAR.AlwaysShow) then\n		UBar:SetParam(\"alpha\", 1);\n		Callback2.FireAndForget(function() UBar:ParamTo(\"alpha\", 0, conf.UBAR.FadeOut); conf.UBAR.IsReady = true; end, nil, ON_LOAD_SHOW_DUR);\n	end\n	\n	if (conf.FPS.SinToggle) then\n		FPS_FRAME:SetParam(\"alpha\", 0);\n	end\nend\n\nfunction OnUIDisplay(args)\n	uiDisplayMode = args;\n	\n	if (not args) then\n		PositionHookedFrames();\n	end\nend\n\nfunction OnPlayerReady()\n	WorldObjList = Game.GetWorldObjectList();\n	CurrentOutPost = Player.GetCurrentOutpostId();\n	LastAnounceTime = math.ceil(tonumber(System.GetClientTime())/1000);\n	\n	if (CurrentOutPost) then\n		OnEnterOutpost({objectId = CurrentOutPost});\n		OnWorldObjectUpdate({objectId = CurrentOutPost});\n	end\n	\n	local stats = Player.GetLifeInfo();\n	LastHealth = stats.Health;\n	\n	LastClip = Player.GetWeaponState(true).Clip;\nend\n\nfunction OnHudShow(args)\n	FRAME:Show(args.show);\n\n	if (args.ignore or not conf.R5Chat.ShowOnLoadingScreen) then\n		return;\n	end\n\n	if (args.loading_screen ) then\n		args.loading_screen = not args.loading_screen; -- Muhahaha :3c\n		args.ignore = true;\n		Component.GenerateEvent(\"MY_HUD_SHOW\", args);\n	end\nend\n\nfunction OnSIN()\n	if (conf.AT.SinToggle and not conf.AT.AlwaysShow) then\n		ShowWidget(ActivityTracker, \"AT\");\n	end\n	\n	if (conf.OS.SinToggle and not conf.OS.AlwaysShow) then\n		ShowWidget(OutPost, \"OS\");\n	end\n	\n	if (conf.EXP.SinToggle and not conf.EXP.AlwaysShow) then\n		ShowWidget(EXPBar, \"EXP\");\n	end\n	\n	if (conf.UBAR.SinToggle and not conf.UBAR.AlwaysShow and not UBarDontFade) then\n		ShowWidget(UBar, \"UBAR\");\n	end\n	\n	if (conf.FPS.SinToggle) then\n		FPS_FRAME:ParamTo(\"alpha\", 1, conf.FPS.FadeOut);\n		if (FPS_Show_CB) then\n			FPS_Show_CB:Cancel();\n		else\n			FPS_Show_CB = Callback2.Create();\n		end\n		FPS_Show_CB:Bind(function() FPS_FRAME:ParamTo(\"alpha\", 0, conf.FPS.FadeOut); end);\n		FPS_Show_CB:Schedule(conf.FPS.FadeHold);\n	end\nend\n\n--	Outpost\nfunction OnEnterOutpost(args)\n	if (conf.OS.AlwaysShow or conf.OS.IsReady == false or not WorldObjList[args.objectId]) then return; end\n	\n	CurrentOutPost = args.objectId;\n	\n	--[[warn(CurrentOutPost);\n	warn(tostring(Game.GetWorldObjectInfo(CurrentOutPost)));\n	warn(tostring(Game.GetWorldObjectStatus(CurrentOutPost)));]]\n	\n	local objInfo = Game.GetWorldObjectInfo(CurrentOutPost);\n	if (objInfo.type == \"outpost\") then\n		local status = Game.GetWorldObjectStatus(CurrentOutPost);\n		LastPwrLvl = status.power_level;\n		LastMW = status.mw_current;\n		LastUnderAttack = status.under_attack;\n	end\n	\n	if (conf.OS.ShowOnEnter) then\n		ShowWidget(OutPost, \"OS\");\n	end\nend\n\nfunction OnWorldObjectUpdate(args)\n	if (conf.OS.AlwaysShow or conf.OS.IsReady == false) then return; end\n	\n	if (isequal(CurrentOutPost, args.objectId)) then\n		local status = Game.GetWorldObjectStatus(CurrentOutPost);\n		local powerLevel = status.power_level;\n		local maxMW = status.mw_max;\n		local mw = status.mw_current;\n		local underAttack = status.under_attack;\n		\n		if (powerLevel ~= LastPwrLvl and conf.OS.ShowOnPowerLvl) then\n			LastPwrLvl = powerLevel;\n			ShowWidget(OutPost, \"OS\");\n		end\n		\n		if (underAttack ~= LastUnderAttack and conf.OS.ShowUnderAttack) then\n			LastUnderAttack = underAttack; \n			ShowWidget(OutPost, \"OS\");\n		end\n		\n		if (HasMWChanged(mw, maxMW)) then\n			LastMW = mw;\n			ShowWidget(OutPost, \"OS\");\n		end\n	end\nend	\n	\n--	EXP BAR\nfunction OnBattleframeChanged(args)\n	if (conf.EXP.AlwaysShow) then\n		return;\n	end\n	\n	if (conf.EXP.IsReady == false or conf.EXP.ShowOnBfChange) then\n		ShowWidget(EXPBar, \"EXP\");\n	end\nend\n\nfunction OnExperienceChanged(args)\n	if (conf.EXP.AlwaysShow) then\n		return;\n	end\n	\n	if (conf.EXP.IsReady == false or conf.EXP.ShowOnEXPChange) then\n		ShowWidget(EXPBar, \"EXP\");\n	end\nend\n\nfunction OnXpModifierChanged(args)\n	if (conf.EXP.AlwaysShow) then\n		return;\n	end\n	\n	if (conf.EXP.IsReady == false or conf.EXP.ShowOnBoostChange) then\n		ShowWidget(EXPBar, \"EXP\");\n	end\nend\n\n--	UBAR\nfunction OnHealthChanged(args)\n	if (conf.UBAR.AlwaysShow) then\n		return;\n	end\n	\n	local stats = Player.GetLifeInfo();\n	local pct = math.ceil((math.abs(stats.Health-LastHealth)/stats.MaxHealth)*100);\n	\n	if (pct >= conf.UBAR.ShowOnHealthPct) then\n		ShowWidget(UBar, \"UBAR\");\n	end\nend\n\nfunction OnWeaponReload(args)\n	if (conf.UBAR.AlwaysShow) then\n		return;\n	end\n	\n	LastClip = Player.GetWeaponState(true).Clip;\n	\n	if (conf.UBAR.ShowOnReload) then\n		ShowWidget(UBar, \"UBAR\");\n	end\nend\n\nfunction OnWeaponChanged(args)\n	if (conf.UBAR.AlwaysShow) then\n		return;\n	end\n	\n	LastClip = Player.GetWeaponState(true).Clip;\n	\n	if (conf.UBAR.ShowOnWeaponChange) then\n		ShowWidget(UBar, \"UBAR\");\n	end\nend\n\nfunction OnWeaponStateChnaged(args)\n	if (conf.UBAR.AlwaysShow) then\n		return;\n	end\n	\n	local wInfo = Player.GetWeaponInfo(true);\n	local MaxAmmo = 0;\n	if (wInfo) then\n		MaxAmmo = wInfo.ClipSize;\n	end\n	\n	local wState = Player.GetWeaponState(true);\n	local clip = 0;\n	if (wState) then\n		clip = wState.Clip;\n	end\n	\n	if (clip == 0 and MaxAmmo == 0) then\n		return;\n	end\n	\n	local pct = math.ceil((math.abs(clip-LastClip)/MaxAmmo)*100);\n	\n	if (conf.UBAR.ShowOnAmmoPct == 0) then\n		if (LastClip ~= clip) then\n			LastClip = clip;\n			ShowWidget(UBar, \"UBAR\");\n		end\n	else\n		if (pct >= conf.UBAR.ShowOnAmmoPct) then\n			LastClip = clip;\n			ShowWidget(UBar, \"UBAR\");\n		end\n	end\nend\n\nfunction OnAblitySelect(args)\n	if (conf.UBAR.AlwaysShow) then\n		return;\n	end\n	\n	if (conf.UBAR.ShowOnAblityChange and not UBarDontFade) then\n		ShowWidget(UBar, \"UBAR\");\n	end\nend\n\nfunction OnAblityUsed(args)\n	if (conf.UBAR.AlwaysShow) then\n		return;\n	end\n	\n	local cd = Player.GetAbilityInfo(args.id).cooldown;\n	if (cd == 0) then -- Some abilitys report 0 for a cool down so default to 30\n		cd = 30;\n	end\n		\n	if (not conf.UBAR.DontHideOnCD and conf.UBAR.ShowOnAblityUsed) then\n		Debug.Log(\"ShowWidget\");\n		ShowWidget(UBar, \"UBAR\");\n	end\n	\n	-- Cancel any lingering effects\n	if (ShowCallbacks[\"UBAR\"]) then\n		ShowCallbacks[\"UBAR\"]:Cancel();\n	end\n	\n	if (conf.UBAR.DontHideOnCD) then\n		UBar:ParamTo(\"alpha\", 1, conf.UBAR.FadeOut);\n			\n		if (AblityFadeCB) then\n			local time = AblityFadeCB:GetRemainingTime();		\n			if (not time or time < cd) then\n				AblityFadeCB:Reschedule(cd);\n			end\n		else\n			AblityFadeCB = Callback2.Create();\n			AblityFadeCB:Bind(function() \n					UBar:ParamTo(\"alpha\", 0, conf.UBAR.FadeOut);\n					UBarDontFade = false;\n				end,\n			nil);\n			AblityFadeCB:Schedule(cd);\n		end\n		UBarDontFade = true;\n	elseif (conf.UBAR.ShowOnCDDone) then\n		if (AblityFadeDoneCB) then\n			local time = AblityFadeDoneCB:GetRemainingTime();\n			if (not time or time < cd) then\n				AblityFadeDoneCB:Reschedule(cd);\n			end\n		else\n			AblityFadeDoneCB = Callback2.Create();\n			AblityFadeDoneCB:Bind(function() ShowWidget(UBar, \"UBAR\"); end, nil);\n			AblityFadeDoneCB:Schedule(cd);\n		end\n	end\nend\n\nfunction OnSuperChargeChanged(args)\n	if (conf.UBAR.AlwaysShow) then\n		return;\n	end\n	\n	local pct = math.abs(LastHKMPct - args.amount);\n	\n	if (pct >= conf.UBAR.ShowOnHKMPct) then\n		LastHKMPct = args.amount;\n		ShowWidget(UBar, \"UBAR\");\n	end\nend\n\nfunction OnAlilitiesChanged(args)\n	if (conf.UBAR.AlwaysShow) then\n		return;\n	end\n\n	if (conf.UBAR.ShowOnCDChange and LastCalldown ~= Player.GetAbilities().action.abilityId) then\n		LastCalldown = Player.GetAbilities().action.abilityId\n		ShowWidget(UBar, \"UBAR\");\n	end\nend\n\nfunction OnVehicleUpdate(args)\n	if (args.role == \"VEHICLE_DRIVER\") then\n		UBar:Show(false);\n	elseif (args.role == \"ROLE_NONE\") then\n		UBar:Show(true);\n	end\nend\n\nfunction OnInputModeChanged(args)\n	if (conf.UBAR.AlwaysShow) then\n		return;\n	end\n	\n	if (args.mode == \"cursor\" and conf.UBAR.ShowOnInputModeChange) then\n		ShowWidget(UBar, \"UBAR\");\n	else\n		ShowWidget(UBar, \"UBAR\");\n	end\nend\n\n--	ACTIVITY_TRACKER\nfunction OnTrackerUpdateMission(args)\n	if (conf.AT.AlwaysShow or conf.AT.IsReady == false) then return; end\n	\n	if (conf.AT.ShowOnMission) then\n		local str = tostring(args.json);\n		local cs = MISC.Alder32(str);\n		local id = jsontotable(str).id;\n		\n		if (actvitys[id] ~= cs) then\n			actvitys[id] = cs;\n			ShowWidget(ActivityTracker, \"AT\");\n		end\n	end\nend\n\nfunction OnTrackerUpdateMissionRemove(args)\n	if (conf.AT.AlwaysShow or conf.AT.IsReady == false) then return; end\n	\n	local id = jsontotable(args.json).id;\n	if (actvitys[id]) then\n		actvitys[id] = nil;\n		ShowWidget(ActivityTracker, \"AT\");\n	end\nend\n\nfunction OnTrackerUpdate(args)\n	if (conf.AT.AlwaysShow or conf.AT.IsReady == false) then return; end\n	\n	if (conf.AT.ShowOnActivity) then\n		local str = tostring(args.json);\n		local cs = MISC.Alder32(str);\n		local id = jsontotable(str).id;\n		\n		if (actvitys[id] ~= cs) then\n			actvitys[id] = cs;\n			ShowWidget(ActivityTracker, \"AT\");\n		end\n	end\nend\n\nfunction OnTrackerRemove(args)\n	if (conf.AT.AlwaysShow or conf.AT.IsReady == false) then return; end\n	\n	local id = jsontotable(args.json).id;\n	if (actvitys[id]) then\n		actvitys[id] = nil;\n		ShowWidget(ActivityTracker, \"AT\");\n	end\nend\n\n--	Announcer\nfunction OnNotify(args)\n	if (not conf.ANC.Enabled) then return; end\n	\n	local text = args.text;\n	local pos = Player.GetPosition();\n	local SubZone = Game.GetSubzoneNameAt(pos.x, pos.y);\n	local time = math.ceil(tonumber(System.GetClientTime())/1000);\n	local HideDurr = 4;\n	\n	--[[\n	log(\"Text: \" .. text);\n	log(\"SubZone: \" .. SubZone);\n	\n	log(\"LastAnounceTime: \" .. LastAnounceTime);\n	log(\"time: \" .. time);\n	log(\"LastAnounceTime + conf.ANC.ZoneMinTime: \" .. (LastAnounceTime + conf.ANC.ZoneMinTime));\n	]]\n	\n	if (text == SubZone and not conf.ANC.ZoneMsgDisabled) then\n		if ((LastAnounceTime + conf.ANC.ZoneMinTime) >= time) then\n			Announcer:Show(false);\n			if (AnouncerZoneCB) then\n				AnouncerZoneCB:Reschedule(HideDurr);\n			else\n				AnouncerZoneCB = Callback2.Create();\n				AnouncerZoneCB:Bind(function() \n					Announcer:Show(true);\n					end,\n				nil);\n				AnouncerZoneCB:Schedule(HideDurr);\n			end\n		end\n			LastAnounceTime = time;\n	else\n	end\nend\n\nfunction LogTest(args)\n	warn(\"-== ON_ENTER_ZONE ==-\");\n	log(tostring(args));\nend\n\n-- FPS\nfunction SetFPS()\n	if (not hasCreatedMoveableFPS or uiDisplayMode) then\n		return;\n	end\n	\n	FPS_TEXT:SetText(string.format(\"%s%.0f\", conf.FPS.Prefix, System.GetCurrentFps()));\n	local dims = FPS_TEXT:GetTextDims();\n	local width = (dims.width+4);\n	local height = (dims.height+4);\n	FPS_FRAME:SetDims(\"width:\"..width..\"; height:\"..height..\";\");\n	InterfaceOptions.ChangeFrameWidth(FPS_FRAME, width);\n	InterfaceOptions.ChangeFrameHeight(FPS_FRAME, height);\nend\n\n--=====================\n--[[.##.....##.....####\n.##.....##......##.\n.##.....##......##.\n.##.....##......##.\n.##.....##......##.\n.##.....##.###..##.\n..#######..###.####]]\n--=====================\nfunction CreateUIOptions()\n	-- Logo\n	InterfaceOptions.AddMultiArt({id=\"LOGO\", url=\"http://arkii.eu01.aws.af.cm/FireFall/Claritii/media/Logo.png\", width=327, height=75, y_offset=\"5\", OnClickUrl=\"http://forums.firefallthegame.com/community/threads/addon-claritii-context-aware-ui.1709241/\"})\n	\n	--	ACTIVITY_TRACKER\n	InterfaceOptions.StartGroup({label=Lokii.GetString(\"ACTIVITY_TRACKER\"), tooltip=Lokii.GetString(\"ENABLE_DISABLE_MSG\"), checkbox=true, id=\"ACTIVITY_TRACKER\", default=conf.AT.Enabled});\n	InterfaceOptions.AddCheckBox({id=\"AT_ALWAYS_SHOW\", label=Lokii.GetString(\"ALWAYS_SHOW\"), tooltip=Lokii.GetString(\"ALWAYS_SHOW_TT\"), default=conf.AT.AlwaysShow});\n	UII.AddUIVal(\"AT_ALWAYS_SHOW\", \"AT.AlwaysShow\", function(args) if (args) then ActivityTracker:SetParam(\"alpha\", 1); else ActivityTracker:SetParam(\"alpha\", 0); end end);\n	\n	InterfaceOptions.AddCheckBox({id=\"AT_SIN_TOGGLE\", label=Lokii.GetString(\"SIN_TOGGLE\"), tooltip=Lokii.GetString(\"SIN_TOGGLE_TT\"), default=conf.AT.SinToggle});\n	UII.AddUIVal(\"AT_SIN_TOGGLE\", \"AT.SinToggle\");\n	\n	InterfaceOptions.AddSlider({id=\"AT_FADE_OUT\", label=Lokii.GetString(\"FADE_OUT_TIME\"), tooltip=Lokii.GetString(\"FADE_OUT_TIME_TT\"), default=conf.AT.FadeOut, min=0.5, max=10, inc=0.5, suffix=\" S\"});\n	UII.AddUIVal(\"AT_FADE_OUT\", \"AT.FadeOut\");\n	\n	InterfaceOptions.AddSlider({id=\"AT_FADE_HOLD\", label=Lokii.GetString(\"FADE_HOLD\"), tooltip=Lokii.GetString(\"FADE_HOLD_TT\"), default=conf.AT.FadeHold, min=0.5, max=30, inc=0.5, suffix=\" S\"});\n	UII.AddUIVal(\"AT_FADE_HOLD\", \"AT.FadeHold\");\n	\n	InterfaceOptions.AddCheckBox({id=\"AT_SHOW_ON_MISSION\", label=Lokii.GetString(\"AT_SHOW_ON_MISSION\"), tooltip=Lokii.GetString(\"AT_SHOW_ON_MISSION_TT\"), default=conf.AT.ShowOnMission});\n	UII.AddUIVal(\"AT_SHOW_ON_MISSION\", \"AT.ShowOnMission\");\n	\n	InterfaceOptions.AddCheckBox({id=\"AT_SHOW_ON_ACTIVITY\", label=Lokii.GetString(\"AT_SHOW_ON_ACTIVITY\"), tooltip=Lokii.GetString(\"AT_SHOW_ON_ACTIVITY_TT\"), default=conf.AT.ShowOnActivity});\n	UII.AddUIVal(\"AT_SHOW_ON_ACTIVITY\", \"AT.ShowOnActivity\");\n	\n	InterfaceOptions.StopGroup();\n	UII.AddUIVal(\"ACTIVITY_TRACKER\", \"AT.Enabled\", function(args) ActivityTracker:Show(args); end);\n	\n	\n	--	UBAR\n	InterfaceOptions.StartGroup({label=Lokii.GetString(\"UBAR\"), tooltip=Lokii.GetString(\"ENABLE_DISABLE_MSG\"),checkbox=true, id=\"UBAR\", default=conf.UBAR.Enabled});\n	InterfaceOptions.AddCheckBox({id=\"UBAR_ALWAYS_SHOW\", label=Lokii.GetString(\"ALWAYS_SHOW\"), tooltip=Lokii.GetString(\"ALWAYS_SHOW_TT\"), default=conf.UBAR.AlwaysShow});\n	UII.AddUIVal(\"UBAR_ALWAYS_SHOW\", \"UBAR.AlwaysShow\", function(args)\n		if (args) then\n			UBar:SetParam(\"alpha\", 1);\n			if (ShowCallbacks[\"UBAR\"]) then\n				ShowCallbacks[\"UBAR\"]:Cancel();\n			end\n		else\n			UBar:SetParam(\"alpha\", 0);\n		end\n	end);\n	\n	InterfaceOptions.AddCheckBox({id=\"UBAR_SIN_TOGGLE\", label=Lokii.GetString(\"SIN_TOGGLE\"), tooltip=Lokii.GetString(\"SIN_TOGGLE_TT\"), default=conf.UBAR.SinToggle});\n	UII.AddUIVal(\"UBAR_SIN_TOGGLE\", \"UBAR.SinToggle\");\n	\n	InterfaceOptions.AddSlider({id=\"UBAR_FADE_OUT\", label=Lokii.GetString(\"FADE_OUT_TIME\"), tooltip=Lokii.GetString(\"FADE_OUT_TIME_TT\"), default=conf.UBAR.FadeOut, min=0.5, max=10, inc=0.5, suffix=\" S\"});\n	UII.AddUIVal(\"UBAR_FADE_OUT\", \"UBAR.FadeOut\");\n	\n	InterfaceOptions.AddSlider({id=\"UBAR_FADE_HOLD\", label=Lokii.GetString(\"FADE_HOLD\"), tooltip=Lokii.GetString(\"FADE_HOLD_TT\"), default=conf.UBAR.FadeHold, min=0.5, max=30, inc=0.5, suffix=\" S\"});\n	UII.AddUIVal(\"UBAR_FADE_HOLD\", \"UBAR.FadeHold\");\n	\n	InterfaceOptions.AddSlider({id=\"UBAR_SHOW_HEALTH_PCT\", label=Lokii.GetString(\"UBAR_SHOW_HEALTH_PCT\"), tooltip=Lokii.GetString(\"UBAR_SHOW_HEALTH_PCT_TT\"), default=conf.UBAR.ShowOnHealthPct, min=0, max=100, inc=1, suffix=\" S\"});\n	UII.AddUIVal(\"UBAR_SHOW_HEALTH_PCT\", \"UBAR.ShowOnHealthPct\");\n	\n	InterfaceOptions.AddSlider({id=\"UBAR_SHOW_AMMO_PCT\", label=Lokii.GetString(\"UBAR_SHOW_AMMO_PCT\"), tooltip=Lokii.GetString(\"UBAR_SHOW_AMMO_PCT_TT\"), default=conf.UBAR.ShowOnAmmoPct, min=0, max=100, inc=1, suffix=\" S\"});\n	UII.AddUIVal(\"UBAR_SHOW_AMMO_PCT\", \"UBAR.ShowOnAmmoPct\");\n	\n	InterfaceOptions.AddSlider({id=\"UBAR_SHOW_HKM_PCT\", label=Lokii.GetString(\"UBAR_SHOW_HKM_PCT\"), tooltip=Lokii.GetString(\"UBAR_SHOW_HKM_PCT_TT\"), default=conf.UBAR.ShowOnHKMPct, min=0, max=100, inc=1, suffix=\" S\"});\n	UII.AddUIVal(\"UBAR_SHOW_HKM_PCT\", \"UBAR.ShowOnHKMPct\");\n	\n	InterfaceOptions.AddCheckBox({id=\"UBAR_SHOW_RELOAD\", label=Lokii.GetString(\"UBAR_SHOW_RELOAD\"), default=conf.UBAR.ShowOnReload});\n	UII.AddUIVal(\"UBAR_SHOW_RELOAD\", \"UBAR.ShowOnReload\");\n	\n	InterfaceOptions.AddCheckBox({id=\"UBAR_SHOW_CHNAGE\", label=Lokii.GetString(\"UBAR_SHOW_WEAP_CHNAGE\"), default=conf.UBAR.ShowOnWeaponChange});\n	UII.AddUIVal(\"UBAR_SHOW_CHNAGE\", \"UBAR.ShowOnWeaponChange\");\n	\n	InterfaceOptions.AddCheckBox({id=\"UBAR_SHOW_ABLITY_CHNAGE\", label=Lokii.GetString(\"UBAR_SHOW_ABLITY_CHNAGE\"), default=conf.UBAR.ShowOnAblityChange});\n	UII.AddUIVal(\"UBAR_SHOW_ABLITY_CHNAGE\", \"UBAR.ShowOnAblityChange\");\n	\n	InterfaceOptions.AddCheckBox({id=\"UBAR_SHOW_ABLITY_USED\", label=Lokii.GetString(\"UBAR_SHOW_ABLITY_USED\"), default=conf.UBAR.ShowOnAblityUsed});\n	UII.AddUIVal(\"UBAR_SHOW_ABLITY_USED\", \"UBAR.ShowOnAblityUsed\");\n	\n	InterfaceOptions.AddCheckBox({id=\"UBAR_SHOW_CD_DONE\", label=Lokii.GetString(\"UBAR_SHOW_CD_DONE\"), default=conf.UBAR.ShowOnCDDone});\n	UII.AddUIVal(\"UBAR_SHOW_CD_DONE\", \"UBAR.ShowOnCDDone\");\n	\n	InterfaceOptions.AddCheckBox({id=\"UBAR_DONT_HIDE_CD\", label=Lokii.GetString(\"UBAR_DONT_HIDE_CD\"), tooltip=Lokii.GetString(\"UBAR_DONT_HIDE_CD_TT\"), default=conf.UBAR.DontHideOnCD});\n	UII.AddUIVal(\"UBAR_DONT_HIDE_CD\", \"UBAR.DontHideOnCD\");\n	\n	InterfaceOptions.AddCheckBox({id=\"UBAR_SHOW_CD_CHANGE\", label=Lokii.GetString(\"UBAR_SHOW_CD_CHANGE\"), tooltip=Lokii.GetString(\"UBAR_SHOW_CD_CHANGE_TT\"), default=conf.UBAR.ShowOnCDChange});\n	UII.AddUIVal(\"UBAR_SHOW_CD_CHANGE\", \"UBAR.ShowOnCDChange\");\n	\n	InterfaceOptions.AddCheckBox({id=\"UBAR_SHOW_INPUTCHNAGED\", label=Lokii.GetString(\"UBAR_SHOW_INPUTCHNAGED\"), tooltip=Lokii.GetString(\"UBAR_SHOW_INPUTCHNAGED_TT\"), default=conf.UBAR.ShowOnInputModeChange});\n	UII.AddUIVal(\"UBAR_SHOW_INPUTCHNAGED\", \"UBAR.ShowOnInputModeChange\");\n	\n	InterfaceOptions.StopGroup();\n	UII.AddUIVal(\"UBAR\", \"UBAR.Enabled\", function(args) UBar:Show(args); end);\n	\n	\n	--	XP_BAR\n	InterfaceOptions.StartGroup({label=Lokii.GetString(\"XP_BAR\"), tooltip=Lokii.GetString(\"ENABLE_DISABLE_MSG\"),checkbox=true, id=\"XP_BAR\", default=conf.EXP.Enabled});\n	InterfaceOptions.AddCheckBox({id=\"EXP_ALWAYS_SHOW\", label=Lokii.GetString(\"ALWAYS_SHOW\"), tooltip=Lokii.GetString(\"ALWAYS_SHOW_TT\"), default=conf.EXP.AlwaysShow});\n	UII.AddUIVal(\"EXP_ALWAYS_SHOW\", \"EXP.AlwaysShow\", function(args) if (args) then EXPBar:SetParam(\"alpha\", 1); else EXPBar:SetParam(\"alpha\", 0); end end);\n	\n	InterfaceOptions.AddCheckBox({id=\"EXP_SIN_TOGGLE\", label=Lokii.GetString(\"SIN_TOGGLE\"), tooltip=Lokii.GetString(\"SIN_TOGGLE_TT\"), default=conf.EXP.SinToggle});\n	UII.AddUIVal(\"EXP_SIN_TOGGLE\", \"EXP.SinToggle\");\n	\n	InterfaceOptions.AddSlider({id=\"EXP_FADE_OUT\", label=Lokii.GetString(\"FADE_OUT_TIME\"), tooltip=Lokii.GetString(\"FADE_OUT_TIME_TT\"), default=conf.EXP.FadeOut, min=0.5, max=10, inc=0.5, suffix=\" S\"});\n	UII.AddUIVal(\"EXP_FADE_OUT\", \"EXP.FadeOut\");\n	\n	InterfaceOptions.AddSlider({id=\"EXP_FADE_HOLD\", label=Lokii.GetString(\"FADE_HOLD\"), tooltip=Lokii.GetString(\"FADE_HOLD_TT\"), default=conf.EXP.FadeHold, min=0.5, max=30, inc=0.5, suffix=\" S\"});\n	UII.AddUIVal(\"EXP_FADE_HOLD\", \"EXP.FadeHold\");\n	\n	InterfaceOptions.AddCheckBox({id=\"EXP_SHOW_BF_CHNAGE\", label=Lokii.GetString(\"EXP_SHOW_BF_CHNAGE\"), tooltip=Lokii.GetString(\"EXP_SHOW_BF_CHNAGE_TT\"), default=conf.EXP.ShowOnBfChange});\n	UII.AddUIVal(\"EXP_SHOW_BF_CHNAGE\", \"EXP.ShowOnBfChange\");\n	\n	InterfaceOptions.AddCheckBox({id=\"EXP_SHOW_EXP_CHNAGE\", label=Lokii.GetString(\"EXP_SHOW_EXP_CHNAGE\"), default=conf.EXP.ShowOnEXPChange});\n	UII.AddUIVal(\"EXP_SHOW_EXP_CHNAGE\", \"EXP.ShowOnEXPChange\");\n	\n	InterfaceOptions.AddCheckBox({id=\"EXP_SHOW_BOOST_CHNAGE\", label=Lokii.GetString(\"EXP_SHOW_BOOST_CHNAGE\"), default=conf.EXP.ShowOnBoostChange});\n	UII.AddUIVal(\"EXP_SHOW_BOOST_CHNAGE\", \"EXP.ShowOnBoostChange\");\n	\n	InterfaceOptions.StopGroup();\n	UII.AddUIVal(\"XP_BAR\", \"EXP.Enabled\", function(args) EXPBar:Show(args); end);\n	\n	\n	--	OUTPOST_STATUS\n	InterfaceOptions.StartGroup({label=Lokii.GetString(\"OUTPOST_STATUS\"), tooltip=Lokii.GetString(\"ENABLE_DISABLE_MSG\"),checkbox=true, id=\"OUTPOST_STATUS\", default=conf.OS.Enabled});\n	InterfaceOptions.AddCheckBox({id=\"OS_ALWAYS_SHOW\", label=Lokii.GetString(\"ALWAYS_SHOW\"), tooltip=Lokii.GetString(\"ALWAYS_SHOW_TT\"), default=conf.OS.AlwaysShow});\n	UII.AddUIVal(\"OS_ALWAYS_SHOW\", \"OS.AlwaysShow\", function(args) if (args) then OutPost:SetParam(\"alpha\", 1); else OutPost:SetParam(\"alpha\", 0); end end);\n	\n	InterfaceOptions.AddCheckBox({id=\"OS_SIN_TOGGLE\", label=Lokii.GetString(\"SIN_TOGGLE\"), tooltip=Lokii.GetString(\"SIN_TOGGLE_TT\"), default=conf.OS.SinToggle});\n	UII.AddUIVal(\"OS_SIN_TOGGLE\", \"OS.SinToggle\");\n	\n	InterfaceOptions.AddSlider({id=\"OS_FADE_OUT\", label=Lokii.GetString(\"FADE_OUT_TIME\"), tooltip=Lokii.GetString(\"FADE_OUT_TIME_TT\"), default=conf.OS.FadeOut, min=0.5, max=10, inc=0.5, suffix=\" S\"});\n	UII.AddUIVal(\"OS_FADE_OUT\", \"OS.FadeOut\");\n	\n	InterfaceOptions.AddSlider({id=\"OS_FADE_HOLD\", label=Lokii.GetString(\"FADE_HOLD\"), tooltip=Lokii.GetString(\"FADE_HOLD_TT\"), default=conf.OS.FadeHold, min=0.5, max=30, inc=0.5, suffix=\" S\"});\n	UII.AddUIVal(\"OS_FADE_HOLD\", \"OS.FadeHold\");\n	\n	InterfaceOptions.AddCheckBox({id=\"OS_SHOW_ON_ENTER\", label=Lokii.GetString(\"OS_SHOW_ON_ENTER\"), tooltip=Lokii.GetString(\"OS_SHOW_ON_ENTER_TT\"), default=conf.OS.ShowOnEnter});\n	UII.AddUIVal(\"OS_SHOW_ON_ENTER\", \"OS.ShowOnEnter\");\n	\n	InterfaceOptions.AddCheckBox({id=\"OS_SHOW_POWER_LEVEL_CHANGE\", label=Lokii.GetString(\"OS_SHOW_POWER_LEVEL_CHANGE\"), default=conf.OS.ShowOnPowerLvl});\n	UII.AddUIVal(\"OS_SHOW_POWER_LEVEL_CHANGE\", \"OS.ShowOnPowerLvl\");\n	\n	InterfaceOptions.AddCheckBox({id=\"OS_SHOW_UNDER_ATTACK\", label=Lokii.GetString(\"OS_SHOW_UNDER_ATTACK\"), default=conf.OS.ShowUnderAttack});\n	UII.AddUIVal(\"OS_SHOW_UNDER_ATTACK\", \"OS.ShowUnderAttack\");\n	\n	InterfaceOptions.AddSlider({id=\"OS_SHOW_MW_CHNAGE_PCT\", label=Lokii.GetString(\"OS_SHOW_MW_CHNAGE_PCT\"), tooltip=Lokii.GetString(\"OS_SHOW_MW_CHNAGE_PCT_TT\"), default=conf.OS.ShowOnMWChangePct, min=0, max=100, inc=1, suffix=\" S\"});\n	UII.AddUIVal(\"OS_SHOW_MW_CHNAGE_PCT\", \"OS.ShowOnMWChangePct\");\n	\n	InterfaceOptions.StopGroup();\n	UII.AddUIVal(\"OUTPOST_STATUS\", \"OS.Enabled\", function(args) OutPost:Show(args); end);\n	\n	--	OUTPOST_STATUS\n	InterfaceOptions.StartGroup({label=Lokii.GetString(\"ANNOUNCER\"), checkbox=true, id=\"ANNOUNCER\", default=true});\n	\n	InterfaceOptions.AddCheckBox({id=\"ANNOUNCER_ZONE_DISABLE\", label=Lokii.GetString(\"ANNOUNCER_ZONE_DISABLE\"), tooltip=Lokii.GetString(\"ANNOUNCER_ZONE_DISABLE_TT\"), default=conf.ANC.ZoneMsgDisabled});\n	UII.AddUIVal(\"ANNOUNCER_ZONE_DISABLE\", \"ANC.ZoneMsgDisabled\", function(args) Announcer:Show(not args); end);\n	\n	InterfaceOptions.AddSlider({id=\"ANNOUNCER_ZONE_TIME\", label=Lokii.GetString(\"ANNOUNCER_ZONE_TIME\"), tooltip=Lokii.GetString(\"ANNOUNCER_ZONE_TIME_TT\"), default=conf.ANC.ZoneMinTime, min=1, max=60, inc=1, suffix=\" S\"});\n	UII.AddUIVal(\"ANNOUNCER_ZONE_TIME\", \"ANC.ZoneMinTime\");\n	\n	InterfaceOptions.StopGroup();\n	UII.AddUIVal(\"ANNOUNCER\", \"ANC.Enabled\");\n	\n	local tab = Lokii.GetString(\"EXTRAS\");\n	InterfaceOptions.StartGroup({label=Lokii.GetString(\"RCHAT\"), checkbox=false, id=\"RCHAT\", subtab={tab}});\n	InterfaceOptions.AddCheckBox({label=Lokii.GetString(\"R5CHAT_SHOW_LOADING\"), tooltip=Lokii.GetString(\"R5CHAT_SHOW_LOADING_TT\"), id=\"R5CHAT_SHOW_LOADING\", default=conf.R5Chat.ShowOnLoadingScreen, subtab={tab}});\n	UII.AddUIVal(\"R5CHAT_SHOW_LOADING\", \"R5Chat.ShowOnLoadingScreen\");\n	InterfaceOptions.StopGroup({subtab={tab}});\n	\n	--==============================--\n	-- 			FPS Counter			--\n	--==============================--\n	\n	InterfaceOptions.StartGroup({label=Lokii.GetString(\"FPS_COUNTER\"), tooltip=Lokii.GetString(\"FPS_COUNTER_TT\"), checkbox=true, id=\"FPS_COUNTER\", default=conf.FPS.Enabled, subtab={tab}});\n	\n	InterfaceOptions.AddCheckBox({id=\"FPS_SIN_TOGGLE\", label=Lokii.GetString(\"SIN_TOGGLE\"), tooltip=Lokii.GetString(\"SIN_TOGGLE_TT\"), default=conf.FPS.SinToggle, subtab={tab}});\n	UII.AddUIVal(\"FPS_SIN_TOGGLE\", \"FPS.SinToggle\", function(args)\n			if (args) then\n				FPS_FRAME:SetParam(\"alpha\", 0);\n			else\n				FPS_FRAME:SetParam(\"alpha\", 1);\n				if (FPS_Show_CB) then\n					FPS_Show_CB:Cancel();\n				end\n			end\n		end);\n	\n	InterfaceOptions.AddSlider({id=\"FPS_FADE_OUT\", label=Lokii.GetString(\"FADE_OUT_TIME\"), tooltip=Lokii.GetString(\"FADE_OUT_TIME_TT\"), default=conf.FPS.FadeOut, min=0.5, max=10, inc=0.5, suffix=\" S\", subtab={tab}});\n	UII.AddUIVal(\"FPS_FADE_OUT\", \"FPS.FadeOut\");\n	\n	InterfaceOptions.AddSlider({id=\"FPS_FADE_HOLD\", label=Lokii.GetString(\"FADE_HOLD\"), tooltip=Lokii.GetString(\"FADE_HOLD_TT\"), default=conf.FPS.FadeHold, min=0.5, max=30, inc=0.5, suffix=\" S\", subtab={tab}});\n	UII.AddUIVal(\"FPS_FADE_HOLD\", \"FPS.FadeHold\");\n	\n	InterfaceOptions.AddChoiceMenu({id=\"FPS_FONT\", label=Lokii.GetString(\"FONT\"), default=conf.FPS.Font, subtab={tab}});\n	\n	for i=1, #FONTS, 1 do\n		InterfaceOptions.AddChoiceEntry({menuId=\"FPS_FONT\", label=FONTS[i], val=FONTS[i], subtab={tab}});\n	end\n	\n	UII.AddUIVal(\"FPS_FONT\", \"FPS.Font\", function (args) FPS_TEXT:SetFont(args); end);\n	\n	InterfaceOptions.AddColorPicker({id=\"FPS_FONT_COLOR\", label=Lokii.GetString(\"FONT_COLOUR\"), default=conf.FPS.FontColor, subtab={tab}});\n	UII.AddUIVal(\"FPS_FONT_COLOR\", \"FPS.FontColor\", function (args)\n			FPS_TEXT:SetText(\"Test\");\n			FPS_TEXT:SetTextColor(args.tint);\n		end);\n	\n	InterfaceOptions.AddColorPicker({id=\"FPS_BG_COLOR\", label=Lokii.GetString(\"BACKGROUND_COLOUR\"), default=conf.FPS.BGColor, subtab={tab}});\n	UII.AddUIVal(\"FPS_BG_COLOR\", \"FPS.BGColor\", function (args) FPS_BACKPLATE:SetParam(\"tint\", args.tint); FPS_BACKPLATE:SetParam(\"alpha\", args.alpha); FPS_BACKPLATE:SetParam(\"exposure\", args.exposure); end);\n	\n	InterfaceOptions.AddTextInput({id=\"FPS_PREFIX\", label=Lokii.GetString(\"PREFIX\"), default=conf.FPS.Prefix, subtab={tab}});\n	UII.AddUIVal(\"FPS_PREFIX\", \"FPS.Prefix\");\n	\n	InterfaceOptions.StopGroup({subtab={tab}});\n	UII.AddUIVal(\"FPS_COUNTER\", \"FPS.Enabled\", function (args)\n			if (args == false and FPS_CB) then\n				FPS_CB:Stop();\n			else\n				FPS_CB:Run(FPS_POLL_RATE);\n			end \n			FPS_FRAME:Show(args);\n			\n			if (not hasCreatedMoveableFPS and args == true) then\n				hasCreatedMoveableFPS = true;\n				InterfaceOptions.AddMovableFrame({\n					frame = FPS_FRAME,\n					label = Lokii.GetString(\"FPS_COUNTER\"),\n					scalable = true\n				});\n			end\n		end);\nend\n\n--=====================\n--		Functions    --\n--=====================\nfunction ShowWidget(WIDGET, ID)\n	WIDGET:ParamTo(\"alpha\", 1, conf[ID].FadeOut);\n	\n	if (ShowCallbacks[ID]) then\n		ShowCallbacks[ID]:Cancel();\n	else\n		ShowCallbacks[ID] = Callback2.Create();\n	end\n	\n	ShowCallbacks[ID]:Bind(function()\n		WIDGET:ParamTo(\"alpha\", 0, conf[ID].FadeOut);\n		if (ID == \"EXP\" and Boosts) then\n			Boosts:ParamTo(\"alpha\", 0, conf[ID].FadeOut);\n		end\n	end);\n	\n	ShowCallbacks[ID]:Schedule(conf[ID].FadeHold);\n	\n	-- Hacky Dwmods support :/\n	if (ID == \"EXP\" and Boosts) then\n		Boosts:ParamTo(\"alpha\", 1, conf[ID].FadeOut);\n	end\nend\n\nfunction GetWidgetPos(ID)\n	local dummyWidget = Component.CreateWidget('<group dimensions=\"dock:fill;\"/>', FRAME);\n	Component.FosterWidget(dummyWidget, ID);\n	local dims = dummyWidget:GetBounds();\n	Component.RemoveWidget(dummyWidget);\n	return dims;\nend\n\nfunction HasMWChanged(currentMW, maxMW)\n	if (maxMW == 0) then\n		return false;\n	end\n	\n	local pct = (currentMW/maxMW)*100;\n	local pct2 = (LastMW/maxMW)*100;\n	pct = math.ceil(math.abs(pct2-pct));\n	\n	--[[log(\"PCT: \" .. tostring(pct));\n	log(\"conf.OS.ShowOnMWChangePct: \" .. tostring(conf.OS.ShowOnMWChangePct));]]\n	\n	if (pct >= conf.OS.ShowOnMWChangePct) then\n		return true;\n	end\n	\n	return false;\nend\n\n-- Hook functions for the UI elements\nfunction HookActivityTracker()\n	local at_id = \"ActivityTracker:ActivityMainGroup\";\n	local dummyWidget = Component.CreateWidget('<group dimensions=\"dock:fill;\"/>', FRAME);\n	Component.FosterWidget(dummyWidget, at_id);\n	\n	Component.FosterWidget(\"ActivityTracker:ActivityLabel\", dummyWidget);\n	Component.FosterWidget(\"ActivityTracker:Activities\", dummyWidget);\n	return dummyWidget;\nend\n\nfunction HookEXP()\n	dummyWidget = Component.CreateWidget('<group dimensions=\"left:0; width:300; top:2; height:44;\"/>', FRAME);\n		\n	Component.FosterWidget(\"EXPBar:BattleframeIcon\", dummyWidget);\n	Component.FosterWidget(\"EXPBar:PlayerName\", dummyWidget);\n	Component.FosterWidget(\"EXPBar:XP\", dummyWidget);\n	\n	-- Check if DWMods is installed, for now just force them into stock locations\n	local dummyWidget2 = Component.CreateWidget('<group dimensions=\"dock:fill;\"/>', dummyWidget);\n	if (Component.FosterWidget(dummyWidget2, \"EXPBar:Boosts.container\")) then\n		Component.FosterWidget(\"EXPBar:xp_group\", dummyWidget2);\n		Component.FosterWidget(\"EXPBar:res_group\", dummyWidget2);\n	else\n		Component.FosterWidget(\"EXPBar:xp_group\", dummyWidget);\n		Component.FosterWidget(\"EXPBar:res_group\", dummyWidget);\n		Component.RemoveWidget(dummyWidget2);\n		dummyWidget2 = nil;\n	end\n	\n	return dummyWidget,dummyWidget2;\nend\n\nfunction HookUBar()\n	local dummyWidget = Component.CreateWidget('<group dimensions=\"center-x:50%; bottom:100%-10; width:600; height:70\" style=\"scale:1.0;\"/>', FRAME);\n	\n	local dummyWidget2 = Component.CreateWidget('<group dimensions=\"center-x:50%; bottom:100%-10; width:600; height:70\" />', dummyWidget);\n	local dummyWidget3 = Component.CreateWidget('<group dimensions=\"center-x:50%; width:400; bottom:100%-2; height:8\" />', dummyWidget);\n	\n	Component.FosterWidget(\"UBar:main.{1}\", dummyWidget2);\n	Component.FosterWidget(\"UBar:main.{2}\", dummyWidget2);\n	Component.FosterWidget(\"UBar:main.{3}\", dummyWidget2);\n	\n	Component.FosterWidget(\"Abilities:SuperBarHUD.{1}\", dummyWidget3);\n	return dummyWidget;\nend\n\nfunction HookOutPost()\n	--local dummyWidget = Component.CreateWidget('<group dimensions=\"center-x:50%; top:0%; height:120; width:300\" />', FRAME);\n	\n	--Component.FosterWidget(\"ow_OutpostState:hud_info\", dummyWidget);\n	\n	local dummyWidget = Component.CreateWidget('<group dimensions=\"dock:fill;\" />', FRAME);\n	\n	Component.FosterWidget(\"ow_OutpostState:hud_info.{1}\", dummyWidget);\n	Component.FosterWidget(\"ow_OutpostState:hud_info.{2}\", dummyWidget);\n	\n	Component.FosterWidget(dummyWidget, \"ow_OutpostState:hud_info\");\n	return dummyWidget;\nend\n\nfunction HookAnnouncer()\n	local dummyWidget = Component.CreateWidget('<group dimensions=\"dock:fill;\" />', FRAME);\n	\n	Component.FosterWidget(dummyWidget, \"Announcer:PopupNotification.{1}\");\n	Component.FosterWidget(\"Announcer:PopupNotification.{1}.{1}\", dummyWidget);\n	Component.FosterWidget(\"Announcer:PopupNotification.{1}.{2}\", dummyWidget);\n	\n	return dummyWidget;\nend\n\nfunction PositionHookedFrames()\n	--EXP\n	--==================================================================================\n	local pos = Component.GetSetting(\"EXPBar\", \"framedims:main\");\n	if (pos) then\n		local str = string.format('%s:%f%%; %s:%f%%; width:300; height:44;', pos.Xbound, pos.Xpct, pos.Ybound, pos.Ypct);\n		EXPBar:SetDims(str);\n	end\n	\n	-- UBAR\n	--==================================================================================\n	local pos = Component.GetSetting(\"UBar\", \"framedims:main\");\n	local scale = Component.GetSetting(\"UBar\", \"framescale:main\");\n	\n	if (pos) then\n		local str = string.format('%s:%f%%; %s:%f%%; width:600; height:70;', pos.Xbound, pos.Xpct, pos.Ybound, pos.Ypct);\n		UBar:SetDims(str);\n	end\n	\n	if (scale) then\n		scale = tonumber(scale)/100;\n		UBar:SetParam(\"scaleX\", scale);\n		UBar:SetParam(\"scaleY\", scale);\n	end\nend",
+			"file": "Claritii.lua",
+			"file_size": 36093,
+			"file_write_time": 130246898161851007,
+			"settings":
+			{
+				"buffer_size": 35045,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<Component xmlns=\"http://www.red5studios.com/\"\nxmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\nxsi:schemaLocation=\"http://www.red5studios.com/ ../../../../schemas/component.xsd\">\n	<Info\n		title=\"Claritii\"\n		author=\"Arkii\"\n		description=\"Hides UI elements when they arn't needed\"\n		url=\"http://www.red5studios.com/\"\n		uiVersion=\"1000\"\n	/>\n\n	<Events>\n		<Event name=\"ON_COMPONENT_LOAD\"						bind=\"OnComponentLoad\"/>\n		<Event name=\"ON_PLAYER_READY\"						bind=\"OnPlayerReady\" />\n		<Event name=\"MY_HUD_SHOW\"							bind=\"OnHudShow\" />\n		<Event name=\"ON_SIN_VIEW\"							bind=\"OnSIN\"/>\n		\n		<Event name=\"MY_MISSION_ACTIVITY_TRACKER_UPDATE\"	bind=\"OnTrackerUpdateMission\"/>\n		<Event name=\"MY_MISSION_ACTIVITY_TRACKER_DELETE\"	bind=\"OnTrackerUpdateMissionRemove\"/>\n		<Event name=\"MY_ACTIVITY_TRACKER_UPDATE\"			bind=\"OnTrackerUpdate\"/>\n		<Event name=\"MY_ACTIVITY_TRACKER_DELETE\"			bind=\"OnTrackerRemove\"/>\n		\n		<Event name=\"ON_WORLD_OBJECT_UPDATED\"				bind=\"OnWorldObjectUpdate\" />\n		<Event name=\"ON_ENTER_OUTPOST_REGION\"				bind=\"OnEnterOutpost\" />\n		\n		<Event name=\"ON_BATTLEFRAME_CHANGED\"				bind=\"OnBattleframeChanged\"/>\n		<Event name=\"ON_EXPERIENCE_CHANGED\"					bind=\"OnExperienceChanged\"/>\n		<Event name=\"ON_XP_BOOST_MODIFIER_CHANGED\"			bind=\"OnXpModifierChanged\"/>\n		\n		<Event name=\"ON_HEALTH_CHANGED\"						bind=\"OnHealthChanged\"/>\n		<Event name=\"ON_WEAPON_STATE_CHANGED\"				bind=\"OnWeaponStateChnaged\"/>\n		<Event name=\"ON_WEAPON_RELOAD\"						bind=\"OnWeaponReload\"/>\n		<Event name=\"ON_WEAPON_CHANGED\"						bind=\"OnWeaponChanged\"/>\n		<Event name=\"ON_ABILITY_SELECTED\"					bind=\"OnAblitySelect\"/>\n		<Event name=\"ON_ABILITY_USED\"						bind=\"OnAblityUsed\"/>\n		<Event name=\"ON_SUPERCHARGE_CHANGED\"				bind=\"OnSuperChargeChanged\"/>\n		<Event name=\"ON_ABILITIES_CHANGED\"					bind=\"OnAlilitiesChanged\"/>\n		<Event name=\"ON_SEAT_CHANGED\"						bind=\"OnVehicleUpdate\"/>\n		<Event name=\"ON_INPUT_MODE_CHANGED\"					bind=\"OnInputModeChanged\" />\n		\n		<Event name=\"ON_NOTIFY\"								bind=\"OnNotify\" />\n		\n		<Event name=\"ON_ENTER_ZONE\"							bind=\"OnNotify\" />\n	</Events>\n\n	<Frames>\n		<HUDFrame name=\"Main\" dimensions=\"dock:fill;\" visible=\"true\">\n		</HUDFrame>\n		\n		<HUDFrame name=\"FPS_FRAME\" dimensions=\"right:0; top:0; width:100; height:20;\" visible=\"true\">\n			<Children>\n				<StillArt id=\"FPS_BackPlate\" dimensions=\"dock:fill\" style=\"texture:colors; region:white; tint:#000000; alpha:0.25;\"/>\n				<Text id=\"FPS_TEXT\" dimensions=\"dock:fill;\" style=\"halign:center; valign:center; alpha:1.0; clip:false; wrap:false\"/>\n			</Children>\n		</HUDFrame>\n	</Frames>\n\n</Component>\n",
+			"file": "Claritii.xml",
+			"file_size": 2649,
+			"file_write_time": 130240954034968848,
+			"settings":
+			{
+				"buffer_size": 2590,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "FONTS = \n{\n	\"Narrow_7\",\n	\"Narrow_8\",\n	\"Narrow_10\",\n	\"Narrow_11\",\n	\"Narrow_13\",\n	\"Narrow_15\",\n	\"Narrow_17\",\n	\"Narrow_18\",\n	\"Narrow_20\",\n	\"Narrow_7B\",\n	\"Narrow_10B\",\n	\"Narrow_11B\",\n	\"Narrow_13B\",\n	\"Narrow_15B\",\n	\"Narrow_17B\",\n	\"Narrow_18B\",\n	\"Narrow_20B\",\n	\"Narrow_26B\",\n	\"Narrow_32B\",\n	\"Narrow_34B\",\n	\"Narrow_50B\",\n	\"Wide_7\",\n	\"Wide_8\",\n	\"Wide_10\",\n	\"Wide_11\",\n	\"Wide_13\",\n	\"Wide_15\",\n	\"Wide_17\",\n	\"Wide_18\",\n	\"Wide_20\",\n	\"Wide_24\",\n	\"Wide_7B\",\n	\"Wide_8B\",\n	\"Wide_10B\",\n	\"Wide_11B\",\n	\"Wide_13B\",\n	\"Wide_15B\",\n	\"Wide_17B\",\n	\"Wide_18B\",\n	\"Wide_20B\",\n	\"Wide_25B\",\n	\"Wide_34B\",\n	\"CapWide_11B\",\n	\"CapWide_13B\",\n	\"Demi_7\",\n	\"Demi_8\",\n	\"Demi_9\",\n	\"Demi_10\",\n	\"Demi_11\",\n	\"Demi_12\",\n	\"Demi_13\",\n	\"Demi_15\",\n	\"Demi_17\",\n	\"Demi_18\",\n	\"Demi_20\",\n	\"Demi_23\",\n	\"Demi_25\",\n	\"Demi_30\",\n	\"Demi_33\",\n	\"Demi_35\",\n	\"Demi_40\",\n	\"Bold_7\",\n	\"Bold_8\",\n	\"Bold_9\",\n	\"Bold_10\",\n	\"Bold_11\",\n	\"Bold_13\",\n	\"Bold_15\",\n	\"Bold_17\",\n	\"Bold_19\",\n	\"Bold_26\",\n	\"UbuntuRegular_10\",\n	\"UbuntuRegular_11\",\n	\"UbuntuRegular_13\",\n	\"UbuntuMediumItalic_9\",\n	\"UbuntuMediumItalic_11\",\n	\"UbuntuMediumItalic_14\",\n	\"UbuntuMedium_8\",\n	\"UbuntuMedium_9\",\n	\"UbuntuMedium_10\",\n	\"UbuntuMedium_11\",\n	\"UbuntuMedium_12\",\n	\"UbuntuMedium_14\",\n	\"UbuntuMedium_18\",\n	\"UbuntuMedium_50\",\n	\"UbuntuBold_7\",\n	\"UbuntuBold_8\",\n	\"UbuntuBold_9\",\n	\"UbuntuBold_10\",\n	\"UbuntuBold_11\",\n	\"UbuntuBold_13\",\n	\"UbuntuBold_23\",\n	\"UbuntuBold_24\",\n	\"UbuntuBold_26\",\n	\"UbuntuRegular_7\",\n	\"UbuntuRegular_8\",\n	\"UbuntuRegular_9\",\n	\"UbuntuMedium_7\",\n	\"UbuntuMedium_8\",\n	\"AAG\",\n	\"AAG_Huge\",\n	\"AAG_Chat\",\n	\"ChoiceText\",\n	\"Teletype\",\n	\"BulletText\",\n	\"CaptureAnnouncement\",\n	\"InteractFrameKey\",\n	\"NotificationSubtitle\",\n	\"NotificationInfo\",\n	\"NotificationOption\",\n};",
+			"file": "Fonts.lua",
+			"file_size": 1783,
+			"file_write_time": 130219766400588503,
+			"settings":
+			{
+				"buffer_size": 1671,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "title=Claritii\nauthor=Arkii\nversion=1.4\npatch=0.7.1710\nurl=http://forums.firefallthegame.com/community/threads/addon-claritii-context-aware-ui.1709241/\ndestination=gui/components/MainUI/Addons\ndescription=Shows and hides various elements of the stock UI according to a set of customizable triggers. Also has a customizable fps counter.",
+			"file": "melder_info.ini",
+			"file_size": 341,
+			"file_write_time": 130234102795541014,
+			"settings":
+			{
+				"buffer_size": 335,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "UII = {};\n\n-- Creates a list box from an array\nfunction UII.ListboxFromArray(LB_ID, LB_label, options, default)\n	InterfaceOptions.AddChoiceMenu({id=LB_ID, label=LB_label, default});\n	for i, v in pairs(options) do\n		InterfaceOptions.AddChoiceEntry({menuId=LB_ID, label=i, val=v});\n	end\nend\n\n-- Look up the strings using Lokii\nfunction UII.ListboxFromArrayLokii(LB_ID, LB_label, options, default)\n	InterfaceOptions.AddChoiceMenu({id=LB_ID, label=Lokii.GetString(LB_label),default=default});\n	for i, v in pairs(options) do\n		log(i);\n		if (type(i) == \"string\") then\n			InterfaceOptions.AddChoiceEntry({menuId=LB_ID, label=Lokii.GetString(i), val=v});\n		else\n			InterfaceOptions.AddChoiceEntry({menuId=LB_ID, label=Lokii.GetString(v), val=v});\n		end\n	end\nend\n\n-- ====================================\n-- UI Callbacks                      --\n-- ====================================\n\n-- Call the given function when the UI option is changed\nUII.UI_Callbacks = {};\nUII.UI_Settings = {};\n\n-- Register the function\nfunction UII.AddUICallback(ID, func)\n	UII.UI_Callbacks[ID] = func;\nend\n\n-- Check if the function should be called\nfunction UII.CheckCallbacks(id, val)\n	local func = UII.UI_Callbacks[id];\n	if (func) then\n		func(val);\n	end\nend\n\n-- Set the settings table\nfunction UII.RegisterSettingsTable(tbl)\n	UII.UI_Settings = tbl;\nend\n\n-- A simple handler if all we want to do is set a value\nfunction UII.AddUIVal(ID, var, func)\n	UII.UI_Callbacks[ID] = \n		function(val)\n			-- Check for a nested table\n			local a,b = var:match\"([^.]*).(.*)\"\n			\n			if (a) then\n				UII.UI_Settings[a][b] = val;\n			else\n				UII.UI_Settings[var] = val;\n			end\n			\n			if (func) then\n				func(val);\n			end\n		end\nend",
+			"file": "libs/Uii.lua",
+			"file_size": 1747,
+			"file_write_time": 130202300053581677,
+			"settings":
+			{
+				"buffer_size": 1681,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "--==============================================================================================\n-- Arkii\n-- A simple localisation tool\n--==============================================================================================\n\n--[[\n	API:\n		Lokii.AddLang(ID, langPath); [string] [string]\n			Add a new locally stored language, id is a string ID used to reference this language pack.\n			langPath should be a string pointing to the Lua file for that language\n	\n		Lokii.ForceLocalFiles(bool) [bool]\n			Force lokii to only use the local lang files.\n			Usefull for dev builds\n			\n		Lokii.SetLocalVersion(ver) [int]\n			Only usefull if you are using web lang packs.\n			Sets what version is the local lang files at.\n		\n		Lokii.SetBaseLang(ID); [string]\n			The base language is used in case the selected language doesn't have a replacement string.\n			The ID should be one of the ids that you provided to Lokii.AddLang.\n				\n		Lokii.SetLang(ID); [string]\n			Sets what language should be used.\n				\n		Lokii.GetString(ID); [string]\n			Gets the string for that id from the currently set language.\n				\n		Lokii.Lang[ID]; \n			Another way to acess the localised strings.\n			\n		Lokii.GetLangList();\n			Returns a list of all the registered language packs.\n			\n		Lokii.SetToLocale()\n			An easy way to set Lokii to use the players default language.\n			\n		Lokii.LoadWebPack(URL); [string]\n			If set then Lokii Will check for a \"index.json\" file at that url and will use it to load extra or updates strings\n			\n		Lokii.RegisterCallback(callback); [function]\n			Set a function to be called when the webpack is downloaded.\n			Only called if a pack is downloaded so if the packs are up to date then it won't be called\n			\n	Lang file example:\n		LANG = jsontotable(\n		{\n			STRING_ID : \"string :D\",\n		}\n		);\n		\n		or\n		\n		LANG =\n		{\n			STRING_ID = \"string :D\",\n		};\n		\n		The first is preferable as you can just copy the json to a file on a web server for use with Lokii.LoadWebPack.\n	\n	Usage example:\n		Lokii.AddLang(\"en\", \"./lang/EN\");\n		Lokii.AddLang(\"jp\", \"./lang/JP\");\n		Lokii.SetBaseLang(\"en\");\n		Lokii.SetLang(\"jp\");\n		Lokii.LoadWebPack(\"localhost/firefall/lang\"); -- optional\n		Lokii.RegisterCallback(OnLokiiLoad); -- optional\n		\n		Component.GenerateEvent('MY_SYSTEM_MESSAGE', {text=Lokii.Lang[\"STRING_ID\"]});\n		\n	Webserver setup:\n		Create a directory on the server to hold your lang files.\n		Create a file in there called \"index.json\"\n		Copy the text below as an example:\n			{\n				\"Version\" : 7,\n				\"en\" : \"EN.json\",\n				\"jp\" : \"JP.json\",\n				\"fr\" : \"FR.json\",\n			}\n		The version number is used to check if Lokii should update, increase it every time you changes the files on the server.\n		After that is an entry for each lang pack you want added to Lokii. ID then the url relative to the current directory.\n		\n		Then create a file for each lang pack at the place you specified in the index.json\n		make sure your web server will server these files as \"application/json\" or FireFall will reject them.\n		That's it ^^\n		\n		Oh and for reference the lang codes for Firefall are:\n			English = en\n			German = de\n			French = fr\n		who would have guessed :p\n]]\n\nif (Lokii) then\n	return;\nend\n\nrequire \"lib/lib_Callback2\";\nrequire \"lib/lib_Debug\";\n\nLokii = {};\nLokii.Lang = {};\n\nlocal PRIVATE = {};\nPRIVATE.Langs = {};\nPRIVATE.BaseLang = \"\";\nPRIVATE.ActiveLang = \"\";\nPRIVATE.VERSION_ID = \"Lokii_Lang_Ver\";\nPRIVATE.CACHED_PREFIX = \"Lokii_Lang_\";\nPRIVATE.CACHED_LANG_LIST = \"Lokii_Lang_List\";\nPRIVATE.HTTP_MAX_RETRIES = 3;\nPRIVATE.ForceLocal = false;\nPRIVATE.LocalLangVer = 1;\n\n-- Register a new lang pack\nfunction Lokii.AddLang(id, langPath)\n	require(langPath);\n	PRIVATE.Langs[id] = LANG;\n	LANG = nil;\nend\n\n-- Force Lokii to only use local Lang files\nfunction Lokii.ForceLocalFiles(bool)\n	PRIVATE.ForceLocal = bool;\nend\n\nfunction Lokii.SetLocalVersion(ver)\n	PRIVATE.LocalLangVer = ver;\nend\n\n-- This sets the base lang, if a replacement lang doesn't have all the strings defined\n-- then the string in the base will be used instead\nfunction Lokii.SetBaseLang(id)\n	-- Check if we have any new lang data cached\n	local langList = Component.GetSetting(PRIVATE.CACHED_LANG_LIST);\n	if (langList ~= nil and not PRIVATE.ForceLocal) then\n		for i = 1, #langList, 1 do\n			PRIVATE.Langs[langList[i]] = Component.GetSetting(PRIVATE.CACHED_PREFIX..langList[i]);\n		end\n	end\n	\n	PRIVATE.BaseLang = id;\n	Lokii.Lang = {};\n	\n	Lokii.Lang = PRIVATE.SimpleCopy(PRIVATE.Langs[PRIVATE.BaseLang]);\nend\n\nfunction Lokii.SetLang(id)\n	PRIVATE.ActiveLang = id;\n\n	-- Copy the base, but don't drop it! We ain't no Skrillex :p (base, bass, close enough)\n	Lokii.Lang = PRIVATE.SimpleCopy(PRIVATE.Langs[PRIVATE.BaseLang]);\n	\n	-- Now override those strings with there replacements\n	if (PRIVATE.Langs[id] == nil) then\n		Debug.Warn(\"That lang pack doesn't exist :/\", \"[\"..id..\"]\");\n	else\n		for i, d in next, PRIVATE.Langs[id], nil do\n			Lokii.Lang[i] = d;\n		end\n	end\nend\n\nfunction Lokii.SetToLocale()\n	Lokii.SetLang(System.GetLocale());\nend\n\nfunction Lokii.GetString(id)\n	return Lokii.Lang[id];\nend\n\nfunction Lokii.GetLangList()\n	local langs = {};\n	for i, v in next, PRIVATE.Langs, nil do\n		table.insert(langs, i);\n	end\n	\n	return langs;\nend\n\nfunction Lokii.RegisterCallback(cb)\n	PRIVATE.cb_Loaded = cb;\nend\n\nfunction Lokii.LoadWebPack(HOST)\n	local CurrentVersion = Component.GetSetting(PRIVATE.VERSION_ID);\n	PRIVATE.WebRequest({url = HOST .. \"/index.json\", cb =\n	function(args)\n	\n		if (PRIVATE.LocalLangVer > args.Version) then\n			return;\n		end\n			\n		if (CurrentVersion == nil or args.Version > CurrentVersion) then\n			CurrentVersion = args.Version;\n			args.Version = nil;\n			local requestsLeft = PRIVATE.HashCount(args);\n			for i, v in next, args, nil do\n				PRIVATE.WebRequest({url= HOST .. \"/\" .. v, cb = \n				function(args2)\n					Debug.Log(\"Loaded language\", i);\n					PRIVATE.Langs[i] = args2; -- Add the lang\n					requestsLeft = requestsLeft - 1;\n					\n					if (requestsLeft == 0) then\n						Debug.Log(\"All languages loaded from the web pack :D\");\n						Lokii.SetLang(PRIVATE.ActiveLang);\n						\n						-- Update or make a cache of these\n						Component.SaveSetting(PRIVATE.VERSION_ID, CurrentVersion);\n						Component.SaveSetting(PRIVATE.CACHED_LANG_LIST, Lokii.GetLangList());\n						for i2, v2 in next, PRIVATE.Langs, nil do\n							Component.SaveSetting(PRIVATE.CACHED_PREFIX..i2, v2);\n						end\n						\n						if (PRIVATE.cb_Loaded) then\n							PRIVATE.cb_Loaded();\n						end\n					end -- Nest\n				end});\n			end -- Nest all the things!\n		end\n	end});\nend -- The end of the ends end end\n\nfunction PRIVATE.SimpleCopy(orig)\n	local copy = {};\n	for i, v in next, orig, nil do\n		copy[i] = v;\n	end\n	\n	return copy;\nend\n\nfunction PRIVATE.HashCount(tbl)\n	local count = 0;\n	for i, v in next, tbl, nil do\n		count = count + 1;\n	end\n	\n	return count;\nend\n\nfunction PRIVATE.WebRequest(prams)\n	if (HTTP.IsRequestPending()) then\n		local delay = math.random(2, 8);\n		if (not prams.tries) then prams.tries = 0; end\n		if (prams.tries < PRIVATE.HTTP_MAX_RETRIES) then\n			Debug.Warn(\"A HTTP Request is pending retrying in\", delay, \"seconds\", \"Retry number\", prams.tries);\n			prams.tries = prams.tries + 1;\n			Callback2.FireAndForget(PRIVATE.WebRequest, prams, delay);\n		else\n			Debug.Warn(\"The HTTP request failed\", prams.tries, \"times. Sorry but I'm call 404 on that guy :< (\", prams.url, \")\");\n		end\n	else\n		HTTP.IssueRequest(prams.url, \"GET\", nil,\n		function(args, err)\n			if args then\n				prams.cb(args);\n			else\n				Debug.Error(\"Error trying to get\", prams.url, \"Error message:\", tostring(err), \"Retrying.\");\n			end \n		end);\n	end\nend",
+			"file": "libs/Lokii.lua",
+			"file_size": 7549,
+			"file_write_time": 130240944642421625,
+			"settings":
+			{
+				"buffer_size": 7549,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "require \"./libs/bit\"\n\nMISC = {};\nlocal MOD_ADLER = 65521;\n\n-- Alder-32\nfunction MISC.Alder32(str)\n	local a = 1;\n	local b = 0;\n	\n	for i = 1, #str do\n		local c = tonumber(str:sub(i,i));\n		\n		a = (a + c) % MOD_ADLER;\n		b = (b + a) % MOD_ADLER;\n	end\n	\n	return bit.bor(bit.blshift(b, 16), a);\nend",
+			"file": "libs/misc.lua",
+			"file_size": 309,
+			"file_write_time": 130192624017913093,
+			"settings":
+			{
+				"buffer_size": 291,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+	],
+	"find":
+	{
+		"height": 0.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "Claritii.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 35045,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								14846,
+								14846
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 8112.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "Claritii.xml",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2590,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/XML/XML.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "Fonts.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1671,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "melder_info.ini",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 335,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								335,
+								335
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "libs/Uii.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1681,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "libs/Lokii.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7549,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "libs/misc.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 291,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"project": "",
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

@@ -167,7 +167,7 @@ function OnComponentLoad()
 	UII.RegisterSettingsTable(conf);
 	
 	-- Lokii
-	--Lokii.ForceLocalFiles(true);
+	Lokii.ForceLocalFiles(true);
 	Lokii.SetLocalVersion(5);
 	Lokii.AddLang("en", "./lang/EN");
 	Lokii.SetBaseLang("en");

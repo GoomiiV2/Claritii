@@ -43,7 +43,7 @@ LANG = jsontotable([[
 	UBAR_SHOW_CD_CHANGE			:	"Show on calldown change:",
 	UBAR_SHOW_CD_CHANGE_TT		:	"If enabled then the UBAR will be shown when the selected calldown is changed.",
 	UBAR_SHOW_INPUTCHNAGED		:	"Show on Input mode change:",
-	UBAR_SHOW_INPUTCHNAGED		:	"Show the UBAR when the input mode has changed. \n eg. When you open chat.",
+	UBAR_SHOW_INPUTCHNAGED_TT	:	"Show the UBAR when the input mode has changed. \neg. When you open chat.",
 	ANNOUNCER					:	"Announcer",
 	ANNOUNCER_ZONE_DISABLE		:	"Disable zone change popups:",
 	ANNOUNCER_ZONE_DISABLE_TT	:	"Prevents pop up like 'Stonewall' poping up when you change zones.",

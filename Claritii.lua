@@ -76,6 +76,7 @@ local conf =
 		FadeHold = 10,
 		ShowOnMission = true,
 		ShowOnActivity = true,
+		ShowOnInputModeChange = false,
 		IsReady = false,
 		SinToggle = true,
 	},
@@ -108,6 +109,7 @@ local conf =
 		ShowOnBfChange = true,
 		ShowOnEXPChange = true,
 		ShowOnBoostChange = true,
+		ShowOnInputModeChange = true,
 		FadeOut = 0.5,
 		FadeHold = 10,
 		IsReady = false,
@@ -124,6 +126,7 @@ local conf =
 		ShowOnPowerLvl = true,
 		ShowUnderAttack = true,
 		ShowOnMWChangePct = 0,
+		ShowOnInputModeChange = false,
 		IsReady = false,
 		SinToggle = true,
 	},
@@ -546,10 +549,24 @@ function OnInputModeChanged(args)
 		return;
 	end
 	
+	-- UBAR
 	if (args.mode == "cursor" and conf.UBAR.ShowOnInputModeChange) then
 		ShowWidget(UBar, "UBAR");
-	else
-		ShowWidget(UBar, "UBAR");
+	end
+
+	--	ACTIVITY_TRACKER
+	if (args.mode == "cursor" and conf.AT.ShowOnInputModeChange) then
+		ShowWidget(ActivityTracker, "AT");
+	end
+
+	--	EXP
+	if (args.mode == "cursor" and conf.EXP.ShowOnInputModeChange) then
+		ShowWidget(EXPBar, "EXP");
+	end
+
+	--	out post
+	if (args.mode == "cursor" and conf.OS.ShowOnInputModeChange) then
+		ShowWidget(OutPost, "OS");
 	end
 end
 
@@ -694,6 +711,9 @@ function CreateUIOptions()
 	
 	InterfaceOptions.AddCheckBox({id="AT_SHOW_ON_ACTIVITY", label=Lokii.GetString("AT_SHOW_ON_ACTIVITY"), tooltip=Lokii.GetString("AT_SHOW_ON_ACTIVITY_TT"), default=conf.AT.ShowOnActivity});
 	UII.AddUIVal("AT_SHOW_ON_ACTIVITY", "AT.ShowOnActivity");
+
+	InterfaceOptions.AddCheckBox({id="AT_SHOW_INPUTCHNAGED", label=Lokii.GetString("SHOW_INPUTCHNAGED"), tooltip=Lokii.GetString("SHOW_INPUTCHNAGED_TT"), default=conf.AT.ShowOnInputModeChange});
+	UII.AddUIVal("AT_SHOW_INPUTCHNAGED", "AT.ShowOnInputModeChange");
 	
 	InterfaceOptions.StopGroup();
 	UII.AddUIVal("ACTIVITY_TRACKER", "AT.Enabled", function(args) ActivityTracker:Show(args); end);
@@ -752,7 +772,7 @@ function CreateUIOptions()
 	InterfaceOptions.AddCheckBox({id="UBAR_SHOW_CD_CHANGE", label=Lokii.GetString("UBAR_SHOW_CD_CHANGE"), tooltip=Lokii.GetString("UBAR_SHOW_CD_CHANGE_TT"), default=conf.UBAR.ShowOnCDChange});
 	UII.AddUIVal("UBAR_SHOW_CD_CHANGE", "UBAR.ShowOnCDChange");
 	
-	InterfaceOptions.AddCheckBox({id="UBAR_SHOW_INPUTCHNAGED", label=Lokii.GetString("UBAR_SHOW_INPUTCHNAGED"), tooltip=Lokii.GetString("UBAR_SHOW_INPUTCHNAGED_TT"), default=conf.UBAR.ShowOnInputModeChange});
+	InterfaceOptions.AddCheckBox({id="UBAR_SHOW_INPUTCHNAGED", label=Lokii.GetString("SHOW_INPUTCHNAGED"), tooltip=Lokii.GetString("SHOW_INPUTCHNAGED_TT"), default=conf.UBAR.ShowOnInputModeChange});
 	UII.AddUIVal("UBAR_SHOW_INPUTCHNAGED", "UBAR.ShowOnInputModeChange");
 	
 	InterfaceOptions.StopGroup();
@@ -781,6 +801,9 @@ function CreateUIOptions()
 	
 	InterfaceOptions.AddCheckBox({id="EXP_SHOW_BOOST_CHNAGE", label=Lokii.GetString("EXP_SHOW_BOOST_CHNAGE"), default=conf.EXP.ShowOnBoostChange});
 	UII.AddUIVal("EXP_SHOW_BOOST_CHNAGE", "EXP.ShowOnBoostChange");
+
+	InterfaceOptions.AddCheckBox({id="EXP_SHOW_INPUTCHNAGED", label=Lokii.GetString("SHOW_INPUTCHNAGED"), tooltip=Lokii.GetString("SHOW_INPUTCHNAGED_TT"), default=conf.EXP.ShowOnInputModeChange});
+	UII.AddUIVal("EXP_SHOW_INPUTCHNAGED", "EXP.ShowOnInputModeChange");
 	
 	InterfaceOptions.StopGroup();
 	UII.AddUIVal("XP_BAR", "EXP.Enabled", function(args) EXPBar:Show(args); end);
@@ -811,6 +834,9 @@ function CreateUIOptions()
 	
 	InterfaceOptions.AddSlider({id="OS_SHOW_MW_CHNAGE_PCT", label=Lokii.GetString("OS_SHOW_MW_CHNAGE_PCT"), tooltip=Lokii.GetString("OS_SHOW_MW_CHNAGE_PCT_TT"), default=conf.OS.ShowOnMWChangePct, min=0, max=100, inc=1, suffix=" S"});
 	UII.AddUIVal("OS_SHOW_MW_CHNAGE_PCT", "OS.ShowOnMWChangePct");
+
+	InterfaceOptions.AddCheckBox({id="OS_SHOW_INPUTCHNAGED", label=Lokii.GetString("SHOW_INPUTCHNAGED"), tooltip=Lokii.GetString("SHOW_INPUTCHNAGED_TT"), default=conf.OS.ShowOnInputModeChange});
+	UII.AddUIVal("OS_SHOW_INPUTCHNAGED", "OS.ShowOnInputModeChange");
 	
 	InterfaceOptions.StopGroup();
 	UII.AddUIVal("OUTPOST_STATUS", "OS.Enabled", function(args) OutPost:Show(args); end);
@@ -975,8 +1001,9 @@ function HookEXP()
 		Component.FosterWidget("EXPBar:xp_group", dummyWidget2);
 		Component.FosterWidget("EXPBar:res_group", dummyWidget2);
 	else
-		Component.FosterWidget("EXPBar:xp_group", dummyWidget);
-		Component.FosterWidget("EXPBar:res_group", dummyWidget);
+		Component.FosterWidget("EXPBar:boost_layout", dummyWidget);
+		Component.FosterWidget("EXPBar:VIP", dummyWidget);
+		Component.FosterWidget("Interact:vip_group", dummyWidget);
 		Component.RemoveWidget(dummyWidget2);
 		dummyWidget2 = nil;
 	end

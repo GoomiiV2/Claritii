@@ -3,72 +3,84 @@
 	{
 		"selected_items":
 		[
+			[
+				"pane",
+				"PanelScale"
+			],
+			[
+				"Panel",
+				"PanelScale"
+			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"file": "Claritii.lua",
+			"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/Airii.lua",
 			"settings":
 			{
-				"buffer_size": 36306,
+				"buffer_size": 17549,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/D/games/Firefall Public Test/Firefall_Public_Test/system/gui/components/MainUI/HUD/UBar/EXPBar.xml",
+			"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/Airii.xml",
 			"settings":
 			{
-				"buffer_size": 4382,
+				"buffer_size": 3405,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "lang/EN.lua",
+			"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/Dropship.lua",
 			"settings":
 			{
-				"buffer_size": 3639,
+				"buffer_size": 2891,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"contents": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<Component xmlns=\"http://www.red5studios.com/\"\nxmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\nxsi:schemaLocation=\"http://www.red5studios.com/ ../../../../schemas/component.xsd\">\n	<Info\n		title=\"Claritii\"\n		author=\"Arkii\"\n		description=\"Hides UI elements when they arn't needed\"\n		url=\"http://www.red5studios.com/\"\n		uiVersion=\"1000\"\n	/>\n\n	<Events>\n		<Event name=\"ON_COMPONENT_LOAD\"						bind=\"OnComponentLoad\"/>\n		<Event name=\"ON_PLAYER_READY\"						bind=\"OnPlayerReady\" />\n		<Event name=\"MY_HUD_SHOW\"							bind=\"OnHudShow\" />\n		<Event name=\"ON_SIN_VIEW\"							bind=\"OnSIN\"/>\n		\n		<Event name=\"MY_MISSION_ACTIVITY_TRACKER_UPDATE\"	bind=\"OnTrackerUpdateMission\"/>\n		<Event name=\"MY_MISSION_ACTIVITY_TRACKER_DELETE\"	bind=\"OnTrackerUpdateMissionRemove\"/>\n		<Event name=\"MY_ACTIVITY_TRACKER_UPDATE\"			bind=\"OnTrackerUpdate\"/>\n		<Event name=\"MY_ACTIVITY_TRACKER_DELETE\"			bind=\"OnTrackerRemove\"/>\n		\n		<Event name=\"ON_WORLD_OBJECT_UPDATED\"				bind=\"OnWorldObjectUpdate\" />\n		<Event name=\"ON_ENTER_OUTPOST_REGION\"				bind=\"OnEnterOutpost\" />\n		\n		<Event name=\"ON_BATTLEFRAME_CHANGED\"				bind=\"OnBattleframeChanged\"/>\n		<Event name=\"ON_EXPERIENCE_CHANGED\"					bind=\"OnExperienceChanged\"/>\n		<Event name=\"ON_XP_BOOST_MODIFIER_CHANGED\"			bind=\"OnXpModifierChanged\"/>\n		\n		<Event name=\"ON_HEALTH_CHANGED\"						bind=\"OnHealthChanged\"/>\n		<Event name=\"ON_WEAPON_STATE_CHANGED\"				bind=\"OnWeaponStateChnaged\"/>\n		<Event name=\"ON_WEAPON_RELOAD\"						bind=\"OnWeaponReload\"/>\n		<Event name=\"ON_WEAPON_CHANGED\"						bind=\"OnWeaponChanged\"/>\n		<Event name=\"ON_ABILITY_SELECTED\"					bind=\"OnAblitySelect\"/>\n		<Event name=\"ON_ABILITY_USED\"						bind=\"OnAblityUsed\"/>\n		<Event name=\"ON_SUPERCHARGE_CHANGED\"				bind=\"OnSuperChargeChanged\"/>\n		<Event name=\"ON_ABILITIES_CHANGED\"					bind=\"OnAlilitiesChanged\"/>\n		<Event name=\"ON_SEAT_CHANGED\"						bind=\"OnVehicleUpdate\"/>\n		<Event name=\"ON_INPUT_MODE_CHANGED\"					bind=\"OnInputModeChanged\" />\n		\n		<Event name=\"ON_NOTIFY\"								bind=\"OnNotify\" />\n		\n		<Event name=\"ON_ENTER_ZONE\"							bind=\"OnNotify\" />\n	</Events>\n\n	<Frames>\n		<HUDFrame name=\"Main\" dimensions=\"dock:fill;\" visible=\"true\">\n		</HUDFrame>\n		\n		<HUDFrame name=\"FPS_FRAME\" dimensions=\"right:0; top:0; width:100; height:20;\" visible=\"true\">\n			<Children>\n				<StillArt id=\"FPS_BackPlate\" dimensions=\"dock:fill\" style=\"texture:colors; region:white; tint:#000000; alpha:0.25;\"/>\n				<Text id=\"FPS_TEXT\" dimensions=\"dock:fill;\" style=\"halign:center; valign:center; alpha:1.0; clip:false; wrap:false\"/>\n			</Children>\n		</HUDFrame>\n	</Frames>\n\n</Component>\n",
-			"file": "Claritii.xml",
-			"file_size": 2649,
-			"file_write_time": 130240954034968848,
+			"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/positions.lua",
 			"settings":
 			{
-				"buffer_size": 2590,
+				"buffer_size": 2827,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"contents": "FONTS = \n{\n	\"Narrow_7\",\n	\"Narrow_8\",\n	\"Narrow_10\",\n	\"Narrow_11\",\n	\"Narrow_13\",\n	\"Narrow_15\",\n	\"Narrow_17\",\n	\"Narrow_18\",\n	\"Narrow_20\",\n	\"Narrow_7B\",\n	\"Narrow_10B\",\n	\"Narrow_11B\",\n	\"Narrow_13B\",\n	\"Narrow_15B\",\n	\"Narrow_17B\",\n	\"Narrow_18B\",\n	\"Narrow_20B\",\n	\"Narrow_26B\",\n	\"Narrow_32B\",\n	\"Narrow_34B\",\n	\"Narrow_50B\",\n	\"Wide_7\",\n	\"Wide_8\",\n	\"Wide_10\",\n	\"Wide_11\",\n	\"Wide_13\",\n	\"Wide_15\",\n	\"Wide_17\",\n	\"Wide_18\",\n	\"Wide_20\",\n	\"Wide_24\",\n	\"Wide_7B\",\n	\"Wide_8B\",\n	\"Wide_10B\",\n	\"Wide_11B\",\n	\"Wide_13B\",\n	\"Wide_15B\",\n	\"Wide_17B\",\n	\"Wide_18B\",\n	\"Wide_20B\",\n	\"Wide_25B\",\n	\"Wide_34B\",\n	\"CapWide_11B\",\n	\"CapWide_13B\",\n	\"Demi_7\",\n	\"Demi_8\",\n	\"Demi_9\",\n	\"Demi_10\",\n	\"Demi_11\",\n	\"Demi_12\",\n	\"Demi_13\",\n	\"Demi_15\",\n	\"Demi_17\",\n	\"Demi_18\",\n	\"Demi_20\",\n	\"Demi_23\",\n	\"Demi_25\",\n	\"Demi_30\",\n	\"Demi_33\",\n	\"Demi_35\",\n	\"Demi_40\",\n	\"Bold_7\",\n	\"Bold_8\",\n	\"Bold_9\",\n	\"Bold_10\",\n	\"Bold_11\",\n	\"Bold_13\",\n	\"Bold_15\",\n	\"Bold_17\",\n	\"Bold_19\",\n	\"Bold_26\",\n	\"UbuntuRegular_10\",\n	\"UbuntuRegular_11\",\n	\"UbuntuRegular_13\",\n	\"UbuntuMediumItalic_9\",\n	\"UbuntuMediumItalic_11\",\n	\"UbuntuMediumItalic_14\",\n	\"UbuntuMedium_8\",\n	\"UbuntuMedium_9\",\n	\"UbuntuMedium_10\",\n	\"UbuntuMedium_11\",\n	\"UbuntuMedium_12\",\n	\"UbuntuMedium_14\",\n	\"UbuntuMedium_18\",\n	\"UbuntuMedium_50\",\n	\"UbuntuBold_7\",\n	\"UbuntuBold_8\",\n	\"UbuntuBold_9\",\n	\"UbuntuBold_10\",\n	\"UbuntuBold_11\",\n	\"UbuntuBold_13\",\n	\"UbuntuBold_23\",\n	\"UbuntuBold_24\",\n	\"UbuntuBold_26\",\n	\"UbuntuRegular_7\",\n	\"UbuntuRegular_8\",\n	\"UbuntuRegular_9\",\n	\"UbuntuMedium_7\",\n	\"UbuntuMedium_8\",\n	\"AAG\",\n	\"AAG_Huge\",\n	\"AAG_Chat\",\n	\"ChoiceText\",\n	\"Teletype\",\n	\"BulletText\",\n	\"CaptureAnnouncement\",\n	\"InteractFrameKey\",\n	\"NotificationSubtitle\",\n	\"NotificationInfo\",\n	\"NotificationOption\",\n};",
-			"file": "Fonts.lua",
-			"file_size": 1783,
-			"file_write_time": 130219766400588503,
+			"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/Printer_Positions.lua",
 			"settings":
 			{
-				"buffer_size": 1671,
+				"buffer_size": 933,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"contents": "UII = {};\n\n-- Creates a list box from an array\nfunction UII.ListboxFromArray(LB_ID, LB_label, options, default)\n	InterfaceOptions.AddChoiceMenu({id=LB_ID, label=LB_label, default});\n	for i, v in pairs(options) do\n		InterfaceOptions.AddChoiceEntry({menuId=LB_ID, label=i, val=v});\n	end\nend\n\n-- Look up the strings using Lokii\nfunction UII.ListboxFromArrayLokii(LB_ID, LB_label, options, default)\n	InterfaceOptions.AddChoiceMenu({id=LB_ID, label=Lokii.GetString(LB_label),default=default});\n	for i, v in pairs(options) do\n		log(i);\n		if (type(i) == \"string\") then\n			InterfaceOptions.AddChoiceEntry({menuId=LB_ID, label=Lokii.GetString(i), val=v});\n		else\n			InterfaceOptions.AddChoiceEntry({menuId=LB_ID, label=Lokii.GetString(v), val=v});\n		end\n	end\nend\n\n-- ====================================\n-- UI Callbacks                      --\n-- ====================================\n\n-- Call the given function when the UI option is changed\nUII.UI_Callbacks = {};\nUII.UI_Settings = {};\n\n-- Register the function\nfunction UII.AddUICallback(ID, func)\n	UII.UI_Callbacks[ID] = func;\nend\n\n-- Check if the function should be called\nfunction UII.CheckCallbacks(id, val)\n	local func = UII.UI_Callbacks[id];\n	if (func) then\n		func(val);\n	end\nend\n\n-- Set the settings table\nfunction UII.RegisterSettingsTable(tbl)\n	UII.UI_Settings = tbl;\nend\n\n-- A simple handler if all we want to do is set a value\nfunction UII.AddUIVal(ID, var, func)\n	UII.UI_Callbacks[ID] = \n		function(val)\n			-- Check for a nested table\n			local a,b = var:match\"([^.]*).(.*)\"\n			\n			if (a) then\n				UII.UI_Settings[a][b] = val;\n			else\n				UII.UI_Settings[var] = val;\n			end\n			\n			if (func) then\n				func(val);\n			end\n		end\nend",
-			"file": "libs/Uii.lua",
-			"file_size": 1747,
-			"file_write_time": 130202300053581677,
+			"file": "/C/Users/Arkii/AppData/Local/Red 5 Studios/Firefall/console.log",
 			"settings":
 			{
-				"buffer_size": 1681,
+				"buffer_size": 110283,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"contents": "--==============================================================================================\n-- Arkii\n-- A simple localisation tool\n--==============================================================================================\n\n--[[\n	API:\n		Lokii.AddLang(ID, langPath); [string] [string]\n			Add a new locally stored language, id is a string ID used to reference this language pack.\n			langPath should be a string pointing to the Lua file for that language\n	\n		Lokii.ForceLocalFiles(bool) [bool]\n			Force lokii to only use the local lang files.\n			Usefull for dev builds\n			\n		Lokii.SetLocalVersion(ver) [int]\n			Only usefull if you are using web lang packs.\n			Sets what version is the local lang files at.\n		\n		Lokii.SetBaseLang(ID); [string]\n			The base language is used in case the selected language doesn't have a replacement string.\n			The ID should be one of the ids that you provided to Lokii.AddLang.\n				\n		Lokii.SetLang(ID); [string]\n			Sets what language should be used.\n				\n		Lokii.GetString(ID); [string]\n			Gets the string for that id from the currently set language.\n				\n		Lokii.Lang[ID]; \n			Another way to acess the localised strings.\n			\n		Lokii.GetLangList();\n			Returns a list of all the registered language packs.\n			\n		Lokii.SetToLocale()\n			An easy way to set Lokii to use the players default language.\n			\n		Lokii.LoadWebPack(URL); [string]\n			If set then Lokii Will check for a \"index.json\" file at that url and will use it to load extra or updates strings\n			\n		Lokii.RegisterCallback(callback); [function]\n			Set a function to be called when the webpack is downloaded.\n			Only called if a pack is downloaded so if the packs are up to date then it won't be called\n			\n	Lang file example:\n		LANG = jsontotable(\n		{\n			STRING_ID : \"string :D\",\n		}\n		);\n		\n		or\n		\n		LANG =\n		{\n			STRING_ID = \"string :D\",\n		};\n		\n		The first is preferable as you can just copy the json to a file on a web server for use with Lokii.LoadWebPack.\n	\n	Usage example:\n		Lokii.AddLang(\"en\", \"./lang/EN\");\n		Lokii.AddLang(\"jp\", \"./lang/JP\");\n		Lokii.SetBaseLang(\"en\");\n		Lokii.SetLang(\"jp\");\n		Lokii.LoadWebPack(\"localhost/firefall/lang\"); -- optional\n		Lokii.RegisterCallback(OnLokiiLoad); -- optional\n		\n		Component.GenerateEvent('MY_SYSTEM_MESSAGE', {text=Lokii.Lang[\"STRING_ID\"]});\n		\n	Webserver setup:\n		Create a directory on the server to hold your lang files.\n		Create a file in there called \"index.json\"\n		Copy the text below as an example:\n			{\n				\"Version\" : 7,\n				\"en\" : \"EN.json\",\n				\"jp\" : \"JP.json\",\n				\"fr\" : \"FR.json\",\n			}\n		The version number is used to check if Lokii should update, increase it every time you changes the files on the server.\n		After that is an entry for each lang pack you want added to Lokii. ID then the url relative to the current directory.\n		\n		Then create a file for each lang pack at the place you specified in the index.json\n		make sure your web server will server these files as \"application/json\" or FireFall will reject them.\n		That's it ^^\n		\n		Oh and for reference the lang codes for Firefall are:\n			English = en\n			German = de\n			French = fr\n		who would have guessed :p\n]]\n\nif (Lokii) then\n	return;\nend\n\nrequire \"lib/lib_Callback2\";\nrequire \"lib/lib_Debug\";\n\nLokii = {};\nLokii.Lang = {};\n\nlocal PRIVATE = {};\nPRIVATE.Langs = {};\nPRIVATE.BaseLang = \"\";\nPRIVATE.ActiveLang = \"\";\nPRIVATE.VERSION_ID = \"Lokii_Lang_Ver\";\nPRIVATE.CACHED_PREFIX = \"Lokii_Lang_\";\nPRIVATE.CACHED_LANG_LIST = \"Lokii_Lang_List\";\nPRIVATE.HTTP_MAX_RETRIES = 3;\nPRIVATE.ForceLocal = false;\nPRIVATE.LocalLangVer = 1;\n\n-- Register a new lang pack\nfunction Lokii.AddLang(id, langPath)\n	require(langPath);\n	PRIVATE.Langs[id] = LANG;\n	LANG = nil;\nend\n\n-- Force Lokii to only use local Lang files\nfunction Lokii.ForceLocalFiles(bool)\n	PRIVATE.ForceLocal = bool;\nend\n\nfunction Lokii.SetLocalVersion(ver)\n	PRIVATE.LocalLangVer = ver;\nend\n\n-- This sets the base lang, if a replacement lang doesn't have all the strings defined\n-- then the string in the base will be used instead\nfunction Lokii.SetBaseLang(id)\n	-- Check if we have any new lang data cached\n	local langList = Component.GetSetting(PRIVATE.CACHED_LANG_LIST);\n	if (langList ~= nil and not PRIVATE.ForceLocal) then\n		for i = 1, #langList, 1 do\n			PRIVATE.Langs[langList[i]] = Component.GetSetting(PRIVATE.CACHED_PREFIX..langList[i]);\n		end\n	end\n	\n	PRIVATE.BaseLang = id;\n	Lokii.Lang = {};\n	\n	Lokii.Lang = PRIVATE.SimpleCopy(PRIVATE.Langs[PRIVATE.BaseLang]);\nend\n\nfunction Lokii.SetLang(id)\n	PRIVATE.ActiveLang = id;\n\n	-- Copy the base, but don't drop it! We ain't no Skrillex :p (base, bass, close enough)\n	Lokii.Lang = PRIVATE.SimpleCopy(PRIVATE.Langs[PRIVATE.BaseLang]);\n	\n	-- Now override those strings with there replacements\n	if (PRIVATE.Langs[id] == nil) then\n		Debug.Warn(\"That lang pack doesn't exist :/\", \"[\"..id..\"]\");\n	else\n		for i, d in next, PRIVATE.Langs[id], nil do\n			Lokii.Lang[i] = d;\n		end\n	end\nend\n\nfunction Lokii.SetToLocale()\n	Lokii.SetLang(System.GetLocale());\nend\n\nfunction Lokii.GetString(id)\n	return Lokii.Lang[id];\nend\n\nfunction Lokii.GetLangList()\n	local langs = {};\n	for i, v in next, PRIVATE.Langs, nil do\n		table.insert(langs, i);\n	end\n	\n	return langs;\nend\n\nfunction Lokii.RegisterCallback(cb)\n	PRIVATE.cb_Loaded = cb;\nend\n\nfunction Lokii.LoadWebPack(HOST)\n	local CurrentVersion = Component.GetSetting(PRIVATE.VERSION_ID);\n	PRIVATE.WebRequest({url = HOST .. \"/index.json\", cb =\n	function(args)\n	\n		if (PRIVATE.LocalLangVer > args.Version) then\n			return;\n		end\n			\n		if (CurrentVersion == nil or args.Version > CurrentVersion) then\n			CurrentVersion = args.Version;\n			args.Version = nil;\n			local requestsLeft = PRIVATE.HashCount(args);\n			for i, v in next, args, nil do\n				PRIVATE.WebRequest({url= HOST .. \"/\" .. v, cb = \n				function(args2)\n					Debug.Log(\"Loaded language\", i);\n					PRIVATE.Langs[i] = args2; -- Add the lang\n					requestsLeft = requestsLeft - 1;\n					\n					if (requestsLeft == 0) then\n						Debug.Log(\"All languages loaded from the web pack :D\");\n						Lokii.SetLang(PRIVATE.ActiveLang);\n						\n						-- Update or make a cache of these\n						Component.SaveSetting(PRIVATE.VERSION_ID, CurrentVersion);\n						Component.SaveSetting(PRIVATE.CACHED_LANG_LIST, Lokii.GetLangList());\n						for i2, v2 in next, PRIVATE.Langs, nil do\n							Component.SaveSetting(PRIVATE.CACHED_PREFIX..i2, v2);\n						end\n						\n						if (PRIVATE.cb_Loaded) then\n							PRIVATE.cb_Loaded();\n						end\n					end -- Nest\n				end});\n			end -- Nest all the things!\n		end\n	end});\nend -- The end of the ends end end\n\nfunction PRIVATE.SimpleCopy(orig)\n	local copy = {};\n	for i, v in next, orig, nil do\n		copy[i] = v;\n	end\n	\n	return copy;\nend\n\nfunction PRIVATE.HashCount(tbl)\n	local count = 0;\n	for i, v in next, tbl, nil do\n		count = count + 1;\n	end\n	\n	return count;\nend\n\nfunction PRIVATE.WebRequest(prams)\n	if (HTTP.IsRequestPending()) then\n		local delay = math.random(2, 8);\n		if (not prams.tries) then prams.tries = 0; end\n		if (prams.tries < PRIVATE.HTTP_MAX_RETRIES) then\n			Debug.Warn(\"A HTTP Request is pending retrying in\", delay, \"seconds\", \"Retry number\", prams.tries);\n			prams.tries = prams.tries + 1;\n			Callback2.FireAndForget(PRIVATE.WebRequest, prams, delay);\n		else\n			Debug.Warn(\"The HTTP request failed\", prams.tries, \"times. Sorry but I'm call 404 on that guy :< (\", prams.url, \")\");\n		end\n	else\n		HTTP.IssueRequest(prams.url, \"GET\", nil,\n		function(args, err)\n			if args then\n				prams.cb(args);\n			else\n				Debug.Error(\"Error trying to get\", prams.url, \"Error message:\", tostring(err), \"Retrying.\");\n			end \n		end);\n	end\nend",
-			"file": "libs/Lokii.lua",
-			"file_size": 7549,
-			"file_write_time": 130240944642421625,
+			"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/objs/panel.lua",
+			"settings":
+			{
+				"buffer_size": 2302,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/libs/Uii.lua",
+			"settings":
+			{
+				"buffer_size": 3779,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/libs/Lokii.lua",
 			"settings":
 			{
 				"buffer_size": 7549,
@@ -76,24 +88,34 @@
 			}
 		},
 		{
-			"contents": "require \"./libs/bit\"\n\nMISC = {};\nlocal MOD_ADLER = 65521;\n\n-- Alder-32\nfunction MISC.Alder32(str)\n	local a = 1;\n	local b = 0;\n	\n	for i = 1, #str do\n		local c = tonumber(str:sub(i,i));\n		\n		a = (a + c) % MOD_ADLER;\n		b = (b + a) % MOD_ADLER;\n	end\n	\n	return bit.bor(bit.blshift(b, 16), a);\nend",
-			"file": "libs/misc.lua",
-			"file_size": 309,
-			"file_write_time": 130192624017913093,
+			"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/lang/DE.lua",
 			"settings":
 			{
-				"buffer_size": 291,
+				"buffer_size": 1503,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"contents": "title=Claritii\nauthor=Arkii\nversion=1.4\npatch=0.7.1710\nurl=http://forums.firefallthegame.com/community/threads/addon-claritii-context-aware-ui.1709241/\ndestination=gui/components/MainUI/Addons\ndescription=Shows and hides various elements of the stock UI according to a set of customizable triggers. Also has a customizable fps counter.",
-			"file": "melder_info.ini",
-			"file_size": 341,
-			"file_write_time": 130234102795541014,
+			"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/lang/EN.lua",
 			"settings":
 			{
-				"buffer_size": 335,
+				"buffer_size": 1895,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/melder_info.ini",
+			"settings":
+			{
+				"buffer_size": 334,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/ChangeLog.txt",
+			"settings":
+			{
+				"buffer_size": 1496,
 				"line_ending": "Windows"
 			}
 		}
@@ -101,15 +123,15 @@
 	"build_system": "",
 	"command_palette":
 	{
-		"height": 0.0,
+		"height": 392.0,
 		"selected_items":
 		[
 		],
-		"width": 0.0
+		"width": 392.0
 	},
 	"console":
 	{
-		"height": 0.0,
+		"height": 60.0,
 		"history":
 		[
 		]
@@ -125,19 +147,35 @@
 	},
 	"file_history":
 	[
+		"/C/Users/Arkii/Documents/Firefall/Addons/Claritii/libs/Lokii.lua",
+		"/C/Users/Arkii/Documents/Firefall/Addons/Airii/libs/lib_LKObjects.lua",
+		"/C/Users/Arkii/Documents/Firefall/Addons/Claritii/Claritii.sublime-project",
+		"/C/Users/Arkii/Documents/Firefall/Addons/Airii/Airii.lua",
+		"/C/Users/Arkii/Downloads/bbbreaker.log",
+		"/C/Users/Arkii/AppData/Local/Red 5 Studios/Firefall/console.log",
+		"/C/Users/Arkii/Documents/Firefall/Addons/Claritii/Claritii.lua",
+		"/D/games/Firefall Public Test/Firefall_Public_Test/system/gui/components/MainUI/HUD/UBar/EXPBar.xml",
+		"/C/Users/Arkii/Documents/Firefall/Addons/Claritii/lang/EN.lua",
+		"/C/Users/Arkii/Documents/Firefall/Addons/Claritii/Claritii.xml",
+		"/C/Users/Arkii/Documents/Firefall/Addons/Claritii/Fonts.lua",
+		"/C/Users/Arkii/Documents/Firefall/Addons/Claritii/libs/Uii.lua",
+		"/C/Users/Arkii/Documents/Firefall/Addons/Claritii/libs/misc.lua",
+		"/C/Users/Arkii/Documents/Firefall/Addons/Claritii/melder_info.ini",
 		"/C/Program Files (x86)/Steam/steamapps/common/skyrim/enbinjector.ini",
 		"/C/Users/Arkii/Documents/test.py",
 		"/C/Users/Arkii/Documents/Firefall/Addons/Claritii/Claritii_Project.sublime-workspace"
 	],
 	"find":
 	{
-		"height": 0.0
+		"height": 34.0
 	},
 	"find_in_files":
 	{
-		"height": 0.0,
+		"height": 90.0,
 		"where_history":
 		[
+			"<selection>",
+			""
 		]
 	},
 	"find_state":
@@ -145,6 +183,12 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			":	",
+			" : ",
+			"-- Needs review",
+			" = ",
+			"Scale",
+			"panels"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -152,6 +196,9 @@
 		"regex": false,
 		"replace_history":
 		[
+			" = ",
+			"",
+			" : "
 		],
 		"reverse": false,
 		"show_context": true,
@@ -162,24 +209,24 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 12,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "Claritii.lua",
+					"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/Airii.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 36306,
+						"buffer_size": 17549,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								12652,
-								12652
+								2167,
+								2167
 							]
 						],
 						"settings":
@@ -188,74 +235,18 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 6287.0,
+						"translation.y": 900.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "/D/games/Firefall Public Test/Firefall_Public_Test/system/gui/components/MainUI/HUD/UBar/EXPBar.xml",
+					"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/Airii.xml",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4382,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/XML/XML.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 675.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "lang/EN.lua",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3639,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								716,
-								733
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Lua/Lua.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 45.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "Claritii.xml",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2590,
+						"buffer_size": 3405,
 						"regions":
 						{
 						},
@@ -278,12 +269,12 @@
 					"type": "text"
 				},
 				{
-					"buffer": 4,
-					"file": "Fonts.lua",
+					"buffer": 2,
+					"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/Dropship.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1671,
+						"buffer_size": 2891,
 						"regions":
 						{
 						},
@@ -292,6 +283,62 @@
 							[
 								0,
 								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/positions.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2827,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								83,
+								83
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/Printer_Positions.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 933,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								840,
+								840
 							]
 						],
 						"settings":
@@ -307,47 +354,46 @@
 				},
 				{
 					"buffer": 5,
-					"file": "libs/Uii.lua",
+					"file": "/C/Users/Arkii/AppData/Local/Red 5 Studios/Firefall/console.log",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1681,
+						"buffer_size": 110283,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								62592,
+								62592
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Lua/Lua.tmLanguage",
-							"translate_tabs_to_spaces": false
+							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 312675.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 6,
-					"file": "libs/Lokii.lua",
+					"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/objs/panel.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 7549,
+						"buffer_size": 2302,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								167,
+								280
 							]
 						],
 						"settings":
@@ -363,11 +409,11 @@
 				},
 				{
 					"buffer": 7,
-					"file": "libs/misc.lua",
+					"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/libs/Uii.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 291,
+						"buffer_size": 3779,
 						"regions":
 						{
 						},
@@ -391,19 +437,130 @@
 				},
 				{
 					"buffer": 8,
-					"file": "melder_info.ini",
+					"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/libs/Lokii.lua",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 335,
+						"buffer_size": 7549,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								335,
-								335
+								4967,
+								4967
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1890.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/lang/DE.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1503,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6,
+								6
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/lang/EN.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1895,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								42,
+								40
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/melder_info.ini",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 334,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								51,
+								51
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 12,
+					"file": "/C/Users/Arkii/Documents/Firefall/Addons/Airii/ChangeLog.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1496,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								461,
+								0
 							]
 						],
 						"settings":
@@ -421,7 +578,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 0.0
+		"height": 23.0
 	},
 	"input":
 	{
@@ -453,7 +610,7 @@
 	"project": "Claritii.sublime-project",
 	"replace":
 	{
-		"height": 0.0
+		"height": 62.0
 	},
 	"save_all_on_build": true,
 	"select_file":

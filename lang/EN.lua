@@ -53,11 +53,18 @@ LANG = jsontotable([[
 	RCHAT						:	"R5Chat:",
 	R5CHAT_SHOW_LOADING			:	"Show the chat on loading",
 	R5CHAT_SHOW_LOADING_TT		:	"Show the chat box on the laoding screen.",
+	R5CHAT_HIDE_BUTTONS			:	"Show chat buttons when: ",
+	R5CHAT_INPUT				:	"Taking Input",
+	R5CHAT_NEVER				:	"Never Ever",
+	R5CHAT_HIDE_SCROLL			:	"Show the scroll bar when: ",
 	FPS_COUNTER					:	"FPS Counter",
 	FPS_COUNTER_TT				:	"Enable/Disable a moveable FPS counter.",
 	FONT						:	"Font:",
 	BACKGROUND_COLOUR			:	"Background colour:",
 	FONT_COLOUR					:	"Font colour:",
 	PREFIX						:	"Prefix: ",
+	GLIDER						:	"Glider: ",
+	GLIDER_SHOW					:	"Show Glider helper: ",
+	GLIDER_SHOW_TT				:	"Show/Hide the Glider helper when gliding"
 	}
 ]]);

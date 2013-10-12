@@ -38,6 +38,9 @@ local Boosts = nil;
 local UBar = nil;
 local OutPost = nil;
 local Announcer = nil;
+local ChatButtons = nil;
+local ChatScroll = nil;
+local Glider = nil;
 
 local CurrentOutPost = nil;
 local LastPwrLvl = 0;
@@ -141,6 +144,8 @@ local conf =
 	R5Chat = 
 	{
 		ShowOnLoadingScreen = true,
+		ButtonHidemode = "",
+		ScrollHideMode = "",
 	},
 	
 	FPS = 
@@ -153,6 +158,11 @@ local conf =
 		SinToggle = false,
 		FadeOut = 0.5,
 		FadeHold = 10,
+	},
+
+	Glider = 
+	{
+		Show = true,
 	},
 };
 
@@ -184,7 +194,9 @@ function OnComponentLoad()
 	UBar = HookUBar();
 	OutPost = HookOutPost();
 	Announcer = HookAnnouncer();
-	
+	ChatButtons, ChatScroll = HookChat();
+	Glider = HookGlider();
+
 	PositionHookedFrames();
 	
 	FPS_CB = Callback2.CreateCycle(SetFPS, nil);
@@ -549,24 +561,41 @@ function OnInputModeChanged(args)
 		return;
 	end
 	
-	-- UBAR
-	if (args.mode == "cursor" and conf.UBAR.ShowOnInputModeChange) then
-		ShowWidget(UBar, "UBAR");
+	if args.mode == "cursor" then
+
+		-- UBAR
+		if (conf.UBAR.ShowOnInputModeChange) then
+			ShowWidget(UBar, "UBAR");
+		end
+
+		--	ACTIVITY_TRACKER
+		if conf.AT.ShowOnInputModeChange then
+			ShowWidget(ActivityTracker, "AT");
+		end
+
+		--	EXP
+		if conf.EXP.ShowOnInputModeChange then
+			ShowWidget(EXPBar, "EXP");
+		end
+
+		--	out post
+		if (conf.OS.ShowOnInputModeChange) then
+			ShowWidget(OutPost, "OS");
+		end
+
 	end
 
-	--	ACTIVITY_TRACKER
-	if (args.mode == "cursor" and conf.AT.ShowOnInputModeChange) then
-		ShowWidget(ActivityTracker, "AT");
+	-- Chat
+	if args.mode == "cursor" and conf.R5Chat.ButtonHidemode == "input" then
+		ChatButtons:Show(true);
+	elseif conf.R5Chat.ButtonHidemode == "input" then
+		ChatButtons:Show(false);
 	end
 
-	--	EXP
-	if (args.mode == "cursor" and conf.EXP.ShowOnInputModeChange) then
-		ShowWidget(EXPBar, "EXP");
-	end
-
-	--	out post
-	if (args.mode == "cursor" and conf.OS.ShowOnInputModeChange) then
-		ShowWidget(OutPost, "OS");
+	if args.mode == "cursor" and conf.R5Chat.ScrollHideMode == "input" then
+		ChatScroll:Show(true);
+	elseif conf.R5Chat.ScrollHideMode == "input" then
+		ChatScroll:Show(false);
 	end
 end
 
@@ -855,8 +884,44 @@ function CreateUIOptions()
 	
 	local tab = Lokii.GetString("EXTRAS");
 	InterfaceOptions.StartGroup({label=Lokii.GetString("RCHAT"), checkbox=false, id="RCHAT", subtab={tab}});
+
 	InterfaceOptions.AddCheckBox({label=Lokii.GetString("R5CHAT_SHOW_LOADING"), tooltip=Lokii.GetString("R5CHAT_SHOW_LOADING_TT"), id="R5CHAT_SHOW_LOADING", default=conf.R5Chat.ShowOnLoadingScreen, subtab={tab}});
 	UII.AddUIVal("R5CHAT_SHOW_LOADING", "R5Chat.ShowOnLoadingScreen");
+
+	-- Chat buttons
+	InterfaceOptions.AddChoiceMenu({id="R5CHAT_HIDE_BUTTONS", label=Lokii.GetString("R5CHAT_HIDE_BUTTONS"), default=conf.R5Chat.ButtonHidemode, subtab={tab}});
+	InterfaceOptions.AddChoiceEntry({menuId="R5CHAT_HIDE_BUTTONS", label=Lokii.GetString("R5CHAT_INPUT"), val="input"});
+	InterfaceOptions.AddChoiceEntry({menuId="R5CHAT_HIDE_BUTTONS", label=Lokii.GetString("R5CHAT_NEVER"), val="never"});
+	UII.AddUIVal("R5CHAT_HIDE_BUTTONS", "R5Chat.ButtonHidemode", 
+		function(args)
+			if args == "never" then
+				ChatButtons:Show(false);
+			else
+				ChatButtons:Show(true);
+			end
+		end);
+
+	-- Chat Scrollbar
+	InterfaceOptions.AddChoiceMenu({id="R5CHAT_HIDE_SCROLL", label=Lokii.GetString("R5CHAT_HIDE_SCROLL"), default=conf.R5Chat.ScrollHideMode, subtab={tab}});
+	InterfaceOptions.AddChoiceEntry({menuId="R5CHAT_HIDE_SCROLL", label=Lokii.GetString("R5CHAT_INPUT"), val="input"});
+	InterfaceOptions.AddChoiceEntry({menuId="R5CHAT_HIDE_SCROLL", label=Lokii.GetString("R5CHAT_NEVER"), val="never"});
+	UII.AddUIVal("R5CHAT_HIDE_SCROLL", "R5Chat.ScrollHideMode", 
+		function(args)
+			if args == "never" then
+				ChatScroll:Show(false);
+			else
+				ChatScroll:Show(true);
+			end
+		end);
+
+	InterfaceOptions.StopGroup({subtab={tab}});
+
+	-- Glider
+	InterfaceOptions.StartGroup({label=Lokii.GetString("GLIDER"), checkbox=false, id="GLIDER", subtab={tab}});
+
+	InterfaceOptions.AddCheckBox({label=Lokii.GetString("GLIDER_SHOW"), tooltip=Lokii.GetString("GLIDER_SHOW_TT"), id="GLIDER_SHOW", default=conf.Glider.Show, subtab={tab}});
+	UII.AddUIVal("GLIDER_SHOW", "Glider.Show", function(args) Glider:Show(args); end);
+
 	InterfaceOptions.StopGroup({subtab={tab}});
 	
 	--==============================--
@@ -1047,6 +1112,32 @@ function HookAnnouncer()
 	Component.FosterWidget("Announcer:PopupNotification.{1}.{2}", dummyWidget);
 	
 	return dummyWidget;
+end
+
+function HookChat()
+	local dummyWidget = Component.CreateWidget('<group dimensions="dock:fill;" />', FRAME);
+
+	Component.FosterWidget(dummyWidget, "R5Chat:TabGroup");
+	Component.FosterWidget("R5Chat:TabGroup.{1}", dummyWidget);
+    Component.FosterWidget("R5Chat:TabGroup.{2}", dummyWidget);
+    Component.FosterWidget("R5Chat:TabGroup.{3}", dummyWidget);
+    Component.FosterWidget("R5Chat:TabGroup.{4}", dummyWidget);
+
+    local dummyWidget2 = Component.CreateWidget('<group dimensions="dock:fill;"/>', FRAME);
+    Component.FosterWidget(dummyWidget2, "R5Chat:MainGroup");
+    Component.FosterWidget("R5Chat:Slider", dummyWidget2);
+
+    return dummyWidget, dummyWidget2;
+end
+
+function HookGlider()
+	local dummyWidget = Component.CreateWidget('<group dimensions="dock:fill;" />', FRAME);
+
+	Component.FosterWidget(dummyWidget, "Glider:Main.{1}");
+	Component.FosterWidget("Glider:yaw", dummyWidget);
+    Component.FosterWidget("Glider:pitch_group", dummyWidget);
+    
+    return dummyWidget;
 end
 
 function PositionHookedFrames()

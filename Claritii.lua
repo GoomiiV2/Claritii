@@ -180,9 +180,10 @@ function OnComponentLoad()
 	UII.RegisterSettingsTable(conf);
 	
 	-- Lokii
-	Lokii.ForceLocalFiles(true);
-	Lokii.SetLocalVersion(5);
+	--Lokii.ForceLocalFiles(true);
+	Lokii.SetLocalVersion(7);
 	Lokii.AddLang("en", "./lang/EN");
+	Lokii.AddLang("de", "./lang/DE");
 	Lokii.SetBaseLang("en");
 	Lokii.LoadWebPack("http://arkii.eu01.aws.af.cm/FireFall/Claritii/langs");
 	Lokii.RegisterCallback(OnLokiiWeb);
@@ -1054,7 +1055,7 @@ function HookActivityTracker()
 end
 
 function HookEXP()
-	dummyWidget = Component.CreateWidget('<group dimensions="left:0; width:300; top:2; height:44;"/>', FRAME);
+	dummyWidget = Component.CreateWidget('<group dimensions="left:0; width:300; top:2; height:100;"/>', FRAME);
 		
 	Component.FosterWidget("EXPBar:BattleframeIcon", dummyWidget);
 	Component.FosterWidget("EXPBar:PlayerName", dummyWidget);
@@ -1068,7 +1069,9 @@ function HookEXP()
 	else
 		Component.FosterWidget("EXPBar:boost_layout", dummyWidget);
 		Component.FosterWidget("EXPBar:VIP", dummyWidget);
-		Component.FosterWidget("Interact:vip_group", dummyWidget);
+		Component.FosterWidget("EXPBar:GAINGROUP", dummyWidget);
+
+		Component.FosterWidget("EXPBar:vip_group",  Component.CreateWidget('<group dimensions="left:0; width:300; top:2; height:100;"/>', dummyWidget));
 		Component.RemoveWidget(dummyWidget2);
 		dummyWidget2 = nil;
 	end
@@ -1136,7 +1139,7 @@ function HookGlider()
 	Component.FosterWidget(dummyWidget, "Glider:Main.{1}");
 	Component.FosterWidget("Glider:yaw", dummyWidget);
     Component.FosterWidget("Glider:pitch_group", dummyWidget);
-    
+
     return dummyWidget;
 end
 

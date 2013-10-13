@@ -1083,13 +1083,15 @@ function HookUBar()
 	local dummyWidget = Component.CreateWidget('<group dimensions="center-x:50%; bottom:100%-10; width:600; height:70" style="scale:1.0;"/>', FRAME);
 	
 	local dummyWidget2 = Component.CreateWidget('<group dimensions="center-x:50%; bottom:100%-10; width:600; height:70" />', dummyWidget);
-	local dummyWidget3 = Component.CreateWidget('<group dimensions="center-x:50%; width:400; bottom:100%-2; height:8" />', dummyWidget);
+	local dummyWidget3 = Component.CreateWidget('<group dimensions="dock:fill;" />', dummyWidget);
 	
 	Component.FosterWidget("UBar:main.{1}", dummyWidget2);
 	Component.FosterWidget("UBar:main.{2}", dummyWidget2);
 	Component.FosterWidget("UBar:main.{3}", dummyWidget2);
 	
-	Component.FosterWidget("Abilities:SuperBarHUD.{1}", dummyWidget3);
+	Component.FosterWidget(dummyWidget3, "Abilities:SuperBar");
+	Component.FosterWidget("Abilities:SuperBar.{1}", dummyWidget3);
+	Component.FosterWidget("Abilities:SuperBar.{2}", dummyWidget3);
 	return dummyWidget;
 end
 

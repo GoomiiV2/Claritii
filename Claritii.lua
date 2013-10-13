@@ -1110,12 +1110,9 @@ function HookOutPost()
 end
 
 function HookAnnouncer()
-	local dummyWidget = Component.CreateWidget('<group dimensions="dock:fill;" />', FRAME);
+	local dummyWidget = Component.CreateWidget('<group dimensions="center-x:50%; center-y:20%; width:660; height:58;" />', FRAME);
 	
-	Component.FosterWidget(dummyWidget, "Announcer:PopupNotification.{1}");
-	Component.FosterWidget("Announcer:PopupNotification.{1}.{1}", dummyWidget);
-	Component.FosterWidget("Announcer:PopupNotification.{1}.{2}", dummyWidget);
-	
+	Component.FosterWidget("Announcer:PopupNotification.{4}", dummyWidget);
 	return dummyWidget;
 end
 

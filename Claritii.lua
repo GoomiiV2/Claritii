@@ -755,7 +755,7 @@ function CreateUIOptions()
 	InterfaceOptions.AddCheckBox({id="UBAR_ALWAYS_SHOW", label=Lokii.GetString("ALWAYS_SHOW"), tooltip=Lokii.GetString("ALWAYS_SHOW_TT"), default=conf.UBAR.AlwaysShow});
 	UII.AddUIVal("UBAR_ALWAYS_SHOW", "UBAR.AlwaysShow", function(args)
 		if (args) then
-			UShowUbar(true);
+			ShowUbar(true);
 			if (ShowCallbacks["UBAR"]) then
 				ShowCallbacks["UBAR"]:Cancel();
 			end

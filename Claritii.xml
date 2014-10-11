@@ -5,7 +5,7 @@ xsi:schemaLocation="http://www.red5studios.com/ ../../../../schemas/component.xs
 	<Info
 		title="Claritii"
 		author="Arkii"
-		description="Hides UI elements when they arn't needed"
+		description="Hides UI elements when they aren't needed"
 		url="http://www.red5studios.com/"
 		uiVersion="1000"
 	/>
@@ -16,10 +16,12 @@ xsi:schemaLocation="http://www.red5studios.com/ ../../../../schemas/component.xs
 		<Event name="MY_HUD_SHOW"							bind="OnHudShow" />
 		<Event name="ON_SIN_VIEW"							bind="OnSIN"/>
 		
-		<Event name="MY_MISSION_ACTIVITY_TRACKER_UPDATE"	bind="OnTrackerUpdateMission"/>
-		<Event name="MY_MISSION_ACTIVITY_TRACKER_DELETE"	bind="OnTrackerUpdateMissionRemove"/>
-		<Event name="MY_ACTIVITY_TRACKER_UPDATE"			bind="OnTrackerUpdate"/>
-		<Event name="MY_ACTIVITY_TRACKER_DELETE"			bind="OnTrackerRemove"/>
+		<Event name="ON_ENCOUNTER_UI_SCOPED_IN"				bind="OnTrackerUpdateMission"/>
+		<Event name="ON_ENCOUNTER_UI_UPDATED"				bind="OnTrackerUpdateMission"/>
+		<Event name="ON_ENCOUNTER_UI_SCOPED_OUT"			bind="OnTrackerUpdateMissionRemove"/>
+		<Event name="MY_ACTIVITY_TRACKER_UPDATE"			bind="OnTrackerUpdateMission"/>
+		<Event name="MY_ACTIVITY_TRACKER_DELETE"			bind="OnTrackerUpdateMissionRemove"/>
+		<Event name="MY_ACTIVITY_TRACKER_CLEAR"				bind="OnTrackerUpdateMissionRemove"/>
 		
 		<Event name="ON_WORLD_OBJECT_UPDATED"				bind="OnWorldObjectUpdate" />
 		<Event name="ON_ENTER_OUTPOST_REGION"				bind="OnEnterOutpost" />
@@ -27,6 +29,7 @@ xsi:schemaLocation="http://www.red5studios.com/ ../../../../schemas/component.xs
 		<Event name="ON_BATTLEFRAME_CHANGED"				bind="OnBattleframeChanged"/>
 		<Event name="ON_EXPERIENCE_CHANGED"					bind="OnExperienceChanged"/>
 		<Event name="ON_XP_BOOST_MODIFIER_CHANGED"			bind="OnXpModifierChanged"/>
+		<Event name="ON_TIMED_DAILY_REWARD"					bind="OnTimedDailyReward"/>
 		
 		<Event name="ON_HEALTH_CHANGED"						bind="OnHealthChanged"/>
 		<Event name="ON_WEAPON_STATE_CHANGED"				bind="OnWeaponStateChnaged"/>
@@ -45,8 +48,8 @@ xsi:schemaLocation="http://www.red5studios.com/ ../../../../schemas/component.xs
 	</Events>
 
 	<Frames>
-		<HUDFrame name="Main" dimensions="dock:fill;" visible="true">
-		</HUDFrame>
+		<PanelFrame name="Main" dimensions="dock:fill;" permanent="true" visible="true" nofocus="true" noclickself="true" depth="10">
+		</PanelFrame>
 		
 		<HUDFrame name="FPS_FRAME" dimensions="right:0; top:0; width:100; height:20;" visible="true">
 			<Children>

@@ -65,6 +65,7 @@ LANG = jsontotable([[
 	PREFIX						:	"Prefix: ",
 	GLIDER						:	"Glider: ",
 	GLIDER_SHOW					:	"Show Glider helper: ",
-	GLIDER_SHOW_TT				:	"Show/Hide the Glider helper when gliding"
+	GLIDER_SHOW_TT				:	"Show/Hide the Glider helper when gliding",
+	EXP_SHOW_ON_TIME_DAILY_REWARD : "Show when daily timed reward is ready"
 	}
 ]]);

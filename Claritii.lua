@@ -69,6 +69,7 @@ local hasCreatedMoveableFPS = false;
 local uiDisplayMode = false;
 
 -- The users configuration settings
+-- So many :<
 local conf =
 {
 	AT = 
@@ -117,6 +118,7 @@ local conf =
 		FadeHold = 10,
 		IsReady = false,
 		SinToggle = true,
+		ShowOnTimeDailyReward = true
 	},
 	
 	OS = 
@@ -182,20 +184,22 @@ function OnComponentLoad()
 	-- Lokii
 	--Lokii.ForceLocalFiles(true);
 	Lokii.SetLocalVersion(7);
+    Lokii.ForceLocalFiles(true);
 	Lokii.AddLang("en", "./lang/EN");
 	Lokii.AddLang("de", "./lang/DE");
 	Lokii.SetBaseLang("en");
-	Lokii.LoadWebPack("http://arkii.eu01.aws.af.cm/FireFall/Claritii/langs");
+	--Lokii.LoadWebPack("http://firefall.NyaaSync.net/Claritii/langs");
 	Lokii.RegisterCallback(OnLokiiWeb);
 	Lokii.SetToLocale();
 	
 	-- Hook the Ui Elements
 	ActivityTracker = HookActivityTracker();
 	EXPBar,Boosts = HookEXP();
-	UBar = HookUBar();
+	UBar = nil; -- Replaced by the actionbar
 	OutPost = HookOutPost();
 	Announcer = HookAnnouncer();
-	ChatButtons, ChatScroll = HookChat();
+	ChatButtons = HookChat();
+    ChatScroll = nil;
 	Glider = HookGlider();
 
 	PositionHookedFrames();
@@ -232,8 +236,7 @@ function OnSettingsLoad()
 	end
 	
 	if not (conf.UBAR.AlwaysShow) then
-		UBar:SetParam("alpha", 1);
-		Callback2.FireAndForget(function() UBar:ParamTo("alpha", 0, conf.UBAR.FadeOut); conf.UBAR.IsReady = true; end, nil, ON_LOAD_SHOW_DUR);
+		Callback2.FireAndForget(function() ShowUbar(false); conf.UBAR.IsReady = true; end, nil, ON_LOAD_SHOW_DUR);
 	end
 	
 	if (conf.FPS.SinToggle) then
@@ -385,6 +388,16 @@ function OnXpModifierChanged(args)
 	end
 	
 	if (conf.EXP.IsReady == false or conf.EXP.ShowOnBoostChange) then
+		ShowWidget(EXPBar, "EXP");
+	end
+end
+
+function OnTimedDailyReward(args)
+	if (conf.EXP.AlwaysShow) then
+		return;
+	end
+	
+	if (conf.EXP.IsReady == false or conf.EXP.ShowOnTimeDailyReward) then
 		ShowWidget(EXPBar, "EXP");
 	end
 end
@@ -550,32 +563,29 @@ function OnAlilitiesChanged(args)
 end
 
 function OnVehicleUpdate(args)
-	if (args.role == "VEHICLE_DRIVER") then
-		UBar:Show(false);
-	elseif (args.role == "ROLE_NONE") then
+	log(tostring(args));
+	if (args.role == "None") then
+		UBar:Show(true);
+	else
 		UBar:Show(true);
 	end
 end
 
 function OnInputModeChanged(args)
-	if (conf.UBAR.AlwaysShow) then
-		return;
-	end
-	
 	if args.mode == "cursor" then
 
 		-- UBAR
-		if (conf.UBAR.ShowOnInputModeChange) then
+		if (conf.UBAR.ShowOnInputModeChange and not conf.UBAR.AlwaysShow) then
 			ShowWidget(UBar, "UBAR");
 		end
 
 		--	ACTIVITY_TRACKER
-		if conf.AT.ShowOnInputModeChange then
+		if conf.AT.ShowOnInputModeChange and not conf.AT.AlwaysShow then
 			ShowWidget(ActivityTracker, "AT");
 		end
 
 		--	EXP
-		if conf.EXP.ShowOnInputModeChange then
+		if conf.EXP.ShowOnInputModeChange and not conf.EXP.AlwaysShow then
 			ShowWidget(EXPBar, "EXP");
 		end
 
@@ -594,9 +604,9 @@ function OnInputModeChanged(args)
 	end
 
 	if args.mode == "cursor" and conf.R5Chat.ScrollHideMode == "input" then
-		ChatScroll:Show(true);
+		--ChatScroll:Show(true);
 	elseif conf.R5Chat.ScrollHideMode == "input" then
-		ChatScroll:Show(false);
+		--ChatScroll:Show(false);
 	end
 end
 
@@ -605,27 +615,17 @@ function OnTrackerUpdateMission(args)
 	if (conf.AT.AlwaysShow or conf.AT.IsReady == false) then return; end
 	
 	if (conf.AT.ShowOnMission) then
-		local str = tostring(args.json);
-		local cs = MISC.Alder32(str);
-		local id = jsontotable(str).id;
-		
-		if (actvitys[id] ~= cs) then
-			actvitys[id] = cs;
-			ShowWidget(ActivityTracker, "AT");
-		end
+		ShowWidget(ActivityTracker, "AT");
 	end
 end
 
 function OnTrackerUpdateMissionRemove(args)
 	if (conf.AT.AlwaysShow or conf.AT.IsReady == false) then return; end
-	
-	local id = jsontotable(args.json).id;
-	if (actvitys[id]) then
-		actvitys[id] = nil;
-		ShowWidget(ActivityTracker, "AT");
-	end
+
+	ShowWidget(ActivityTracker, "AT");
 end
 
+--[[
 function OnTrackerUpdate(args)
 	if (conf.AT.AlwaysShow or conf.AT.IsReady == false) then return; end
 	
@@ -650,6 +650,7 @@ function OnTrackerRemove(args)
 		ShowWidget(ActivityTracker, "AT");
 	end
 end
+]]
 
 --	Announcer
 function OnNotify(args)
@@ -720,7 +721,7 @@ end
 --=====================
 function CreateUIOptions()
 	-- Logo
-	InterfaceOptions.AddMultiArt({id="LOGO", url="http://arkii.eu01.aws.af.cm/FireFall/Claritii/media/Logo.png", width=327, height=75, y_offset="5", OnClickUrl="http://forums.firefallthegame.com/community/threads/addon-claritii-context-aware-ui.1709241/"})
+	InterfaceOptions.AddMultiArt({id="LOGO", url="www.firefall.NyaaSync.net/Claritii/media/Logo.png", width=327, height=75, y_offset="5", OnClickUrl="http://forums.firefallthegame.com/community/threads/addon-claritii-context-aware-ui.1709241/"})
 	
 	--	ACTIVITY_TRACKER
 	InterfaceOptions.StartGroup({label=Lokii.GetString("ACTIVITY_TRACKER"), tooltip=Lokii.GetString("ENABLE_DISABLE_MSG"), checkbox=true, id="ACTIVITY_TRACKER", default=conf.AT.Enabled});
@@ -739,8 +740,8 @@ function CreateUIOptions()
 	InterfaceOptions.AddCheckBox({id="AT_SHOW_ON_MISSION", label=Lokii.GetString("AT_SHOW_ON_MISSION"), tooltip=Lokii.GetString("AT_SHOW_ON_MISSION_TT"), default=conf.AT.ShowOnMission});
 	UII.AddUIVal("AT_SHOW_ON_MISSION", "AT.ShowOnMission");
 	
-	InterfaceOptions.AddCheckBox({id="AT_SHOW_ON_ACTIVITY", label=Lokii.GetString("AT_SHOW_ON_ACTIVITY"), tooltip=Lokii.GetString("AT_SHOW_ON_ACTIVITY_TT"), default=conf.AT.ShowOnActivity});
-	UII.AddUIVal("AT_SHOW_ON_ACTIVITY", "AT.ShowOnActivity");
+	--[[InterfaceOptions.AddCheckBox({id="AT_SHOW_ON_ACTIVITY", label=Lokii.GetString("AT_SHOW_ON_ACTIVITY"), tooltip=Lokii.GetString("AT_SHOW_ON_ACTIVITY_TT"), default=conf.AT.ShowOnActivity});
+	UII.AddUIVal("AT_SHOW_ON_ACTIVITY", "AT.ShowOnActivity");]]
 
 	InterfaceOptions.AddCheckBox({id="AT_SHOW_INPUTCHNAGED", label=Lokii.GetString("SHOW_INPUTCHNAGED"), tooltip=Lokii.GetString("SHOW_INPUTCHNAGED_TT"), default=conf.AT.ShowOnInputModeChange});
 	UII.AddUIVal("AT_SHOW_INPUTCHNAGED", "AT.ShowOnInputModeChange");
@@ -754,12 +755,12 @@ function CreateUIOptions()
 	InterfaceOptions.AddCheckBox({id="UBAR_ALWAYS_SHOW", label=Lokii.GetString("ALWAYS_SHOW"), tooltip=Lokii.GetString("ALWAYS_SHOW_TT"), default=conf.UBAR.AlwaysShow});
 	UII.AddUIVal("UBAR_ALWAYS_SHOW", "UBAR.AlwaysShow", function(args)
 		if (args) then
-			UBar:SetParam("alpha", 1);
+			UShowUbar(true);
 			if (ShowCallbacks["UBAR"]) then
 				ShowCallbacks["UBAR"]:Cancel();
 			end
 		else
-			UBar:SetParam("alpha", 0);
+			ShowUbar(false);
 		end
 	end);
 	
@@ -806,7 +807,7 @@ function CreateUIOptions()
 	UII.AddUIVal("UBAR_SHOW_INPUTCHNAGED", "UBAR.ShowOnInputModeChange");
 	
 	InterfaceOptions.StopGroup();
-	UII.AddUIVal("UBAR", "UBAR.Enabled", function(args) UBar:Show(args); end);
+	UII.AddUIVal("UBAR", "UBAR.Enabled", function(args) ShowUbar(args); end);
 	
 	
 	--	XP_BAR
@@ -835,9 +836,11 @@ function CreateUIOptions()
 	InterfaceOptions.AddCheckBox({id="EXP_SHOW_INPUTCHNAGED", label=Lokii.GetString("SHOW_INPUTCHNAGED"), tooltip=Lokii.GetString("SHOW_INPUTCHNAGED_TT"), default=conf.EXP.ShowOnInputModeChange});
 	UII.AddUIVal("EXP_SHOW_INPUTCHNAGED", "EXP.ShowOnInputModeChange");
 	
+	InterfaceOptions.AddCheckBox({id="EXP_SHOW_ON_TIME_DAILY_REWARD", label=Lokii.GetString("EXP_SHOW_ON_TIME_DAILY_REWARD"), default=conf.EXP.ShowOnTimeDailyReward});
+	UII.AddUIVal("EXP_SHOW_ON_TIME_DAILY_REWARD", "EXP.ShowOnTimeDailyReward");
+	
 	InterfaceOptions.StopGroup();
 	UII.AddUIVal("XP_BAR", "EXP.Enabled", function(args) EXPBar:Show(args); end);
-	
 	
 	--	OUTPOST_STATUS
 	InterfaceOptions.StartGroup({label=Lokii.GetString("OUTPOST_STATUS"), tooltip=Lokii.GetString("ENABLE_DISABLE_MSG"),checkbox=true, id="OUTPOST_STATUS", default=conf.OS.Enabled});
@@ -903,7 +906,7 @@ function CreateUIOptions()
 		end);
 
 	-- Chat Scrollbar
-	InterfaceOptions.AddChoiceMenu({id="R5CHAT_HIDE_SCROLL", label=Lokii.GetString("R5CHAT_HIDE_SCROLL"), default=conf.R5Chat.ScrollHideMode, subtab={tab}});
+	--[[InterfaceOptions.AddChoiceMenu({id="R5CHAT_HIDE_SCROLL", label=Lokii.GetString("R5CHAT_HIDE_SCROLL"), default=conf.R5Chat.ScrollHideMode, subtab={tab}});
 	InterfaceOptions.AddChoiceEntry({menuId="R5CHAT_HIDE_SCROLL", label=Lokii.GetString("R5CHAT_INPUT"), val="input"});
 	InterfaceOptions.AddChoiceEntry({menuId="R5CHAT_HIDE_SCROLL", label=Lokii.GetString("R5CHAT_NEVER"), val="never"});
 	UII.AddUIVal("R5CHAT_HIDE_SCROLL", "R5Chat.ScrollHideMode", 
@@ -913,7 +916,7 @@ function CreateUIOptions()
 			else
 				ChatScroll:Show(true);
 			end
-		end);
+		end);]]
 
 	InterfaceOptions.StopGroup({subtab={tab}});
 
@@ -993,7 +996,11 @@ end
 --		Functions    --
 --=====================
 function ShowWidget(WIDGET, ID)
-	WIDGET:ParamTo("alpha", 1, conf[ID].FadeOut);
+    if (ID == "UBAR" and not Player.IsInVehicle()) then
+        ShowUbar(true);
+    else
+	    WIDGET:ParamTo("alpha", 1, conf[ID].FadeOut);
+    end
 	
 	if (ShowCallbacks[ID]) then
 		ShowCallbacks[ID]:Cancel();
@@ -1002,18 +1009,17 @@ function ShowWidget(WIDGET, ID)
 	end
 	
 	ShowCallbacks[ID]:Bind(function()
-		WIDGET:ParamTo("alpha", 0, conf[ID].FadeOut);
-		if (ID == "EXP" and Boosts) then
-			Boosts:ParamTo("alpha", 0, conf[ID].FadeOut);
-		end
+        if (ID == "UBAR") then
+            ShowUbar(false);
+        else
+            WIDGET:ParamTo("alpha", 0, conf[ID].FadeOut);
+            if (ID == "EXP" and Boosts) then
+                Boosts:ParamTo("alpha", 0, conf[ID].FadeOut);
+            end
+        end
 	end);
 	
 	ShowCallbacks[ID]:Schedule(conf[ID].FadeHold);
-	
-	-- Hacky Dwmods support :/
-	if (ID == "EXP" and Boosts) then
-		Boosts:ParamTo("alpha", 1, conf[ID].FadeOut);
-	end
 end
 
 function GetWidgetPos(ID)
@@ -1045,53 +1051,25 @@ end
 
 -- Hook functions for the UI elements
 function HookActivityTracker()
-	local at_id = "ActivityTracker:ActivityMainGroup";
+	local at_id = "ActivityTracker:Main.{1}";
 	local dummyWidget = Component.CreateWidget('<group dimensions="dock:fill;"/>', FRAME);
 	Component.FosterWidget(dummyWidget, at_id);
 	
-	Component.FosterWidget("ActivityTracker:ActivityLabel", dummyWidget);
-	Component.FosterWidget("ActivityTracker:Activities", dummyWidget);
+	Component.FosterWidget("ActivityTracker:Main.{1}.{1}", dummyWidget);
+	Component.FosterWidget("ActivityTracker:Main.{1}.{2}", dummyWidget);
 	return dummyWidget;
 end
 
+-- R5 why must up keep changing this layout D:
 function HookEXP()
-	dummyWidget = Component.CreateWidget('<group dimensions="left:0; width:300; top:2; height:100;"/>', FRAME);
+	local dummyWidget = Component.CreateWidget('<group dimensions="left:0; width:300; top:2; height:100;"/>', FRAME);
 		
 	Component.FosterWidget("EXPBar:BattleframeIcon", dummyWidget);
-	Component.FosterWidget("EXPBar:PlayerName", dummyWidget);
-	Component.FosterWidget("EXPBar:XP", dummyWidget);
+	Component.FosterWidget("EXPBar:main.{2}", dummyWidget);
+	Component.FosterWidget("EXPBar:level_group", dummyWidget);
+	Component.FosterWidget("EXPBar:main.{4}", dummyWidget);
+	Component.FosterWidget("EXPBar:main.{5}", dummyWidget);
 	
-	-- Check if DWMods is installed, for now just force them into stock locations
-	local dummyWidget2 = Component.CreateWidget('<group dimensions="dock:fill;"/>', dummyWidget);
-	if (Component.FosterWidget(dummyWidget2, "EXPBar:Boosts.container")) then
-		Component.FosterWidget("EXPBar:xp_group", dummyWidget2);
-		Component.FosterWidget("EXPBar:res_group", dummyWidget2);
-	else
-		Component.FosterWidget("EXPBar:boost_layout", dummyWidget);
-		Component.FosterWidget("EXPBar:VIP", dummyWidget);
-		Component.FosterWidget("EXPBar:GAINGROUP", dummyWidget);
-
-		Component.FosterWidget("EXPBar:vip_group",  Component.CreateWidget('<group dimensions="left:0; width:300; top:2; height:100;"/>', dummyWidget));
-		Component.RemoveWidget(dummyWidget2);
-		dummyWidget2 = nil;
-	end
-	
-	return dummyWidget,dummyWidget2;
-end
-
-function HookUBar()
-	local dummyWidget = Component.CreateWidget('<group dimensions="center-x:50%; bottom:100%-10; width:600; height:70" style="scale:1.0;"/>', FRAME);
-	
-	local dummyWidget2 = Component.CreateWidget('<group dimensions="center-x:50%; bottom:100%-10; width:600; height:70" />', dummyWidget);
-	local dummyWidget3 = Component.CreateWidget('<group dimensions="dock:fill;" />', dummyWidget);
-	
-	Component.FosterWidget("UBar:main.{1}", dummyWidget2);
-	Component.FosterWidget("UBar:main.{2}", dummyWidget2);
-	Component.FosterWidget("UBar:main.{3}", dummyWidget2);
-	
-	Component.FosterWidget(dummyWidget3, "Abilities:SuperBar");
-	Component.FosterWidget("Abilities:SuperBar.{1}", dummyWidget3);
-	Component.FosterWidget("Abilities:SuperBar.{2}", dummyWidget3);
 	return dummyWidget;
 end
 
@@ -1119,17 +1097,14 @@ end
 function HookChat()
 	local dummyWidget = Component.CreateWidget('<group dimensions="dock:fill;" />', FRAME);
 
-	Component.FosterWidget(dummyWidget, "R5Chat:TabGroup");
-	Component.FosterWidget("R5Chat:TabGroup.{1}", dummyWidget);
-    Component.FosterWidget("R5Chat:TabGroup.{2}", dummyWidget);
-    Component.FosterWidget("R5Chat:TabGroup.{3}", dummyWidget);
-    Component.FosterWidget("R5Chat:TabGroup.{4}", dummyWidget);
-
-    local dummyWidget2 = Component.CreateWidget('<group dimensions="dock:fill;"/>', FRAME);
+    -- Hah, Fancy new chat 0, me 1
+	Component.FosterWidget("Chat:Frame_Main.FosteringGroup.{4}", dummyWidget);
+	Component.FosterWidget(dummyWidget, "Chat:Frame_Main.FosteringGroup");
+    --[[local dummyWidget2 = Component.CreateWidget('<group dimensions="dock:fill;"/>', FRAME);
     Component.FosterWidget(dummyWidget2, "R5Chat:MainGroup");
-    Component.FosterWidget("R5Chat:Slider", dummyWidget2);
+    Component.FosterWidget("R5Chat:Slider", dummyWidget2);]]
 
-    return dummyWidget, dummyWidget2;
+    return dummyWidget;
 end
 
 function HookGlider()
@@ -1137,7 +1112,6 @@ function HookGlider()
 
 	Component.FosterWidget(dummyWidget, "Glider:Main.{1}");
 	Component.FosterWidget("Glider:yaw", dummyWidget);
-    Component.FosterWidget("Glider:pitch_group", dummyWidget);
 
     return dummyWidget;
 end
@@ -1166,4 +1140,9 @@ function PositionHookedFrames()
 		UBar:SetParam("scaleX", scale);
 		UBar:SetParam("scaleY", scale);
 	end
+end
+
+-- HACK: but then most of this addon is :p
+function ShowUbar(show)
+    Component.GenerateEvent("MY_VEHICLE_MODE_SHOW", {show = not show, claritii=true});
 end
